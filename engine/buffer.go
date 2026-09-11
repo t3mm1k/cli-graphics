@@ -56,7 +56,7 @@ func (b *Buffer) Blit(child [][]rune, x, y int) {
 
 func (b *Buffer) Flush() {
 	var builder strings.Builder
-	builder.WriteString("\u001B[H\u001B[2J\u001B[3J")
+	//builder.WriteString("\u001B[H\u001B[2J\u001B[3J")
 
 	for _, row := range b.Data {
 		builder.WriteString(string(row))

@@ -2,26 +2,14 @@ package widgets
 
 import (
 	"cli-graphics/engine"
+	"cli-graphics/utils"
 	"unicode/utf8"
 )
 
 type Label struct {
-	x, y int
-
 	text string
 
-	w, h int
-
-	Border bool
-
-	Buffer *engine.Buffer
-}
-
-func GetActuallySize(hasBorder bool, w, h int) (W, H int) {
-	if hasBorder {
-		return w + 2, h + 2
-	}
-	return w, h
+	engine.BaseComponent
 }
 
 func NewLabel(x, y int, border bool, text string, l ...int) *Label {
@@ -33,49 +21,21 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 		width = utf8.RuneCountInString(text)
 	}
 
-	width, height := GetActuallySize(border, width, 1)
-
-	buf := engine.NewBuffer(width, height)
+	width, height := utils.GetActuallySize(border, width, 1)
 
 	return &Label{
-		text:   text,
-		x:      x,
-		y:      y,
-		w:      width,
-		h:      height,
-		Border: border,
-		Buffer: buf,
+		BaseComponent: engine.NewBaseComponent(x, y, width, height, border),
+		text:          text,
 	}
-}
-
-func (l *Label) GetCoords() (x, y int) {
-	return l.x, l.y
-}
-
-func (l *Label) GetSize() (w, h int) {
-	return l.w, l.h
 }
 
 func (l *Label) Render() {
 
-	if l.Border {
-		for x := 1; x < l.w-1; x++ {
-			l.Buffer.Data[0][x] = '─'
-			l.Buffer.Data[l.h-1][x] = '─'
-		}
+	l.RenderBorder(false)
 
-		for y := 1; y < l.h-1; y++ {
-			l.Buffer.Data[y][0] = '│'
-			l.Buffer.Data[y][l.w-1] = '│'
-		}
+	w, _ := l.GetSize()
 
-		l.Buffer.Data[0][0] = '┌'
-		l.Buffer.Data[0][l.w-1] = '┐'
-		l.Buffer.Data[l.h-1][0] = '└'
-		l.Buffer.Data[l.h-1][l.w-1] = '┘'
-	}
-
-	var textW, textH int = l.w, 0
+	var textW, textH int = w, 0
 
 	if l.Border {
 		textH = 1

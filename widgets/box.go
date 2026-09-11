@@ -3,11 +3,7 @@ package widgets
 import "cli-graphics/engine"
 
 type Box struct {
-	w, h int
-	x, y int
-
-	Buffer *engine.Buffer
-
+	engine.BaseComponent
 	Children []engine.Component
 
 	focusedIndex int
@@ -20,11 +16,7 @@ func (b *Box) IsFocused() bool {
 
 func NewBox(x, y, w, h int) *Box {
 	return &Box{
-		w:      w,
-		h:      h,
-		x:      x,
-		y:      y,
-		Buffer: engine.NewBuffer(w, h),
+		BaseComponent: engine.NewBaseComponent(x, y, w, h, true),
 	}
 }
 
@@ -32,30 +24,12 @@ func (b *Box) GetBuffer() [][]rune {
 	return b.Buffer.GetObjects()
 }
 
-func (b *Box) GetCoords() (x, y int) {
-	return b.x, b.y
-}
-
-func (b *Box) GetSize() (w, h int) {
-	return b.w, b.h
-}
 func (b *Box) Render() {
 	b.Buffer.Clear()
 
-	for x := 1; x < b.w-1; x++ {
-		b.Buffer.Data[0][x] = '─'
-		b.Buffer.Data[b.h-1][x] = '─'
-	}
+	//w, h := b.GetSize()
 
-	for y := 1; y < b.h-1; y++ {
-		b.Buffer.Data[y][0] = '│'
-		b.Buffer.Data[y][b.w-1] = '│'
-	}
-
-	b.Buffer.Data[0][0] = '┌'
-	b.Buffer.Data[0][b.w-1] = '┐'
-	b.Buffer.Data[b.h-1][0] = '└'
-	b.Buffer.Data[b.h-1][b.w-1] = '┘'
+	b.RenderBorder(false)
 
 	for _, child := range b.Children {
 		child.Render()

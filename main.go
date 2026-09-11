@@ -51,6 +51,8 @@ func ReadKey() string {
 	return "Unknown"
 }
 func main() {
+	//TODO ПОДУМАТЬ НАД ПРИВАТНЫМИ ПОЛЯМИ ВО ВСЕХ СТРУКТУРАХ КРОМЕ BUTTON и INPUT
+
 	keyEvents := make(chan string)
 
 	go func() {
@@ -71,7 +73,7 @@ func main() {
 	buttonInBox.OnClick = func() {
 		buttonInBox.SetText("Clicked!")
 	}
-	labelWithoutBorder := widgets.NewLabel(40, 18, false, "test without border", 12)
+	labelWithoutBorder := widgets.NewLabel(40, 15, true, "lab")
 
 	window1.AddChild(buttonInBox)
 
