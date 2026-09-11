@@ -2,9 +2,61 @@ package main
 
 import (
 	"cli-graphics/widgets"
+	"os"
+
+	"golang.org/x/term"
 )
 
+func ReadKey() string {
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		panic(err)
+	}
+
+	defer term.Restore(int(os.Stdin.Fd()), oldState)
+
+	b := make([]byte, 3)
+	n, _ := os.Stdin.Read(b)
+
+	if n == 1 {
+		switch b[0] {
+		case 3:
+			return "Ctrl+C"
+		case 13:
+			return "Enter"
+		case 27:
+			return "Escape"
+		case 127, 8:
+			return "Backspace"
+		default:
+			return string(b[0])
+		}
+	} else if n == 3 && b[0] == 27 && b[1] == 91 {
+
+		switch b[2] {
+		case 65:
+			return "Up"
+		case 66:
+			return "Down"
+		case 67:
+			return "Right"
+		case 68:
+			return "Left"
+		}
+	}
+
+	return "Unknown"
+}
 func main() {
+	keyEvents := make(chan string)
+
+	go func() {
+		for {
+			key := ReadKey()
+			keyEvents <- key
+		}
+	}()
+
 	rootScreen := widgets.NewBox(0, 0, 80, 24)
 
 	window1 := widgets.NewBox(5, 5, 30, 10)
@@ -19,8 +71,18 @@ func main() {
 	rootScreen.AddChild(label)
 	rootScreen.AddChild(labelWithoutBorder)
 
-	rootScreen.Render()
+	for {
+		select {
+		case key := <-keyEvents:
+			switch key {
+			case "q":
+				return
+			}
+		}
 
-	rootScreen.Buffer.Flush()
+		rootScreen.Render()
+
+		rootScreen.Buffer.Flush()
+	}
 
 }
