@@ -45,6 +45,8 @@ func (l *ListView) Render() {
 	}
 }
 
+func (l *ListView) OnTick() {}
+
 func (l *ListView) Print() {
 	buf := l.Buffer.GetObjects()
 	for _, row := range buf {

@@ -4,6 +4,8 @@ import (
 	"cli-graphics/widgets"
 	"fmt"
 	"os"
+	"time"
+	"unicode/utf8"
 
 	"golang.org/x/term"
 )
@@ -34,8 +36,11 @@ func ReadKey() string {
 		default:
 			return string(b[0])
 		}
-	} else if n == 3 && b[0] == 27 && b[1] == 91 {
+	} else if n == 2 {
+		r, _ := utf8.DecodeRune(b[:n])
+		return string(r)
 
+	} else if n == 3 && b[0] == 27 && b[1] == 91 {
 		switch b[2] {
 		case 65:
 			return "Up"
@@ -51,9 +56,9 @@ func ReadKey() string {
 	return "Unknown"
 }
 func main() {
-	//TODO ПОДУМАТЬ НАД ПРИВАТНЫМИ ПОЛЯМИ ВО ВСЕХ СТРУКТУРАХ КРОМЕ BUTTON и INPUT
 
 	keyEvents := make(chan string)
+	ticker := time.NewTicker(500 * time.Millisecond)
 
 	go func() {
 		for {
@@ -65,7 +70,6 @@ func main() {
 	rootScreen := widgets.NewBox(0, 0, 80, 24)
 
 	window1 := widgets.NewBox(5, 6, 30, 10)
-	window2 := widgets.NewBox(40, 6, 20, 8)
 	list := widgets.NewList(12, 5, 29, 1, []string{"тп на аме — Серега Пират", "Почему ты еще не фанат? — Серега Пират", "Я поднимаю свою голову вверх — Серега Пират", "ЧСВ — Lida & Серега Пират", "Зомби апокалипсис — Серега Пират", "Вайбмен — Серега Пират", "как же он силён — Серега Пират", "Ну и что, что я вор? — Серега Пират", "прости я не знаю — Серега Пират", "ну где моя нога — Серега Пират"})
 	button := widgets.NewButton(40, 20, "but", func() { fmt.Println("but") })
 	button1 := widgets.NewButton(46, 20, "but1", func() { fmt.Println("but1") })
@@ -74,11 +78,16 @@ func main() {
 		buttonInBox.SetText("Clicked!")
 	}
 	labelWithoutBorder := widgets.NewLabel(40, 15, true, "lab")
+	input := widgets.NewInput(1, 2, 18, nil)
+	input.OnInput = func(key string) {
+		value := input.GetValue()
+		input.SetValue(value + key)
+	}
 
 	window1.AddChild(buttonInBox)
+	rootScreen.AddChild(input)
 
 	rootScreen.AddChild(window1)
-	rootScreen.AddChild(window2)
 	rootScreen.AddChild(list)
 	rootScreen.AddChild(button)
 	rootScreen.AddChild(button1)
@@ -90,7 +99,7 @@ func main() {
 	for {
 		select {
 		case key := <-keyEvents:
-			if key == "q" {
+			if key == "Ctrl+C" {
 				return
 			}
 
@@ -101,6 +110,12 @@ func main() {
 			} else {
 				rootScreen.HandleKey(key)
 			}
+		case <-ticker.C:
+			//TODO подумать про логику on tick чтобы не ререндерить лишнего... хотя вероятно это не будет проблемой.
+			//TODO в будущем подумать о рендере как в реакте, ререндер только того что изменилось а это сложно(((
+
+			rootScreen.OnTick()
+			rootScreen.Render()
 		}
 
 		rootScreen.Render()

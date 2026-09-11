@@ -8,4 +8,6 @@ type Component interface {
 	GetCoords() (x, y int)
 
 	GetSize() (w, h int)
+
+	OnTick()
 }

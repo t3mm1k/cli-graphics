@@ -42,7 +42,9 @@ func (l *Label) Render() {
 		textW -= 2
 	}
 
-	for i, let := range l.text {
+	text := []rune(l.text)
+
+	for i, let := range text {
 		pos := i
 		if l.Border {
 			pos += 1
@@ -53,6 +55,8 @@ func (l *Label) Render() {
 		l.Buffer.Data[textH][pos] = let
 	}
 }
+
+func (l *Label) OnTick() {}
 
 func (l *Label) GetBuffer() [][]rune {
 	return l.Buffer.GetObjects()

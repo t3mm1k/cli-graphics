@@ -44,6 +44,8 @@ func (b *Button) SetFocus(focused bool) {
 	b.isFocused = focused
 }
 
+func (b *Button) OnTick() {}
+
 func (b *Button) IsFocused() bool {
 	return b.isFocused
 }

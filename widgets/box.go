@@ -38,6 +38,12 @@ func (b *Box) Render() {
 	}
 }
 
+func (b *Box) OnTick() {
+	for _, child := range b.Children {
+		child.OnTick()
+	}
+}
+
 func (b *Box) AddChild(child engine.Component) {
 	b.Children = append(b.Children, child)
 }
