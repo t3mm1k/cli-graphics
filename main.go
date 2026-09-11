@@ -2,6 +2,7 @@ package main
 
 import (
 	"cli-graphics/widgets"
+	"fmt"
 	"os"
 
 	"golang.org/x/term"
@@ -10,7 +11,7 @@ import (
 func ReadKey() string {
 	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
-		panic(err)
+		fmt.Print(err)
 	}
 
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
@@ -59,17 +60,20 @@ func main() {
 
 	rootScreen := widgets.NewBox(0, 0, 80, 24)
 
-	window1 := widgets.NewBox(5, 5, 30, 10)
-	window2 := widgets.NewBox(40, 5, 20, 8)
-	list := widgets.NewList(12, 5, 29, 2, []string{"тп на аме — Серега Пират", "Почему ты еще не фанат? — Серега Пират", "Я поднимаю свою голову вверх — Серега Пират", "ЧСВ — Lida & Серега Пират", "Зомби апокалипсис — Серега Пират", "Вайбмен — Серега Пират", "как же он силён — Серега Пират", "Ну и что, что я вор? — Серега Пират", "прости я не знаю — Серега Пират", "ну где моя нога — Серега Пират"})
-	label := widgets.NewLabel(40, 20, true, "test with border", 12)
+	window1 := widgets.NewBox(5, 6, 30, 10)
+	window2 := widgets.NewBox(40, 6, 20, 8)
+	list := widgets.NewList(12, 5, 29, 1, []string{"тп на аме — Серега Пират", "Почему ты еще не фанат? — Серега Пират", "Я поднимаю свою голову вверх — Серега Пират", "ЧСВ — Lida & Серега Пират", "Зомби апокалипсис — Серега Пират", "Вайбмен — Серега Пират", "как же он силён — Серега Пират", "Ну и что, что я вор? — Серега Пират", "прости я не знаю — Серега Пират", "ну где моя нога — Серега Пират"})
+	button := widgets.NewButton(40, 20, "but", func() { fmt.Println("but") })
 	labelWithoutBorder := widgets.NewLabel(40, 18, false, "test without border", 12)
 
 	rootScreen.AddChild(window1)
 	rootScreen.AddChild(window2)
 	rootScreen.AddChild(list)
-	rootScreen.AddChild(label)
+	rootScreen.AddChild(button)
 	rootScreen.AddChild(labelWithoutBorder)
+	rootScreen.Render()
+
+	rootScreen.Buffer.Flush()
 
 	for {
 		select {
