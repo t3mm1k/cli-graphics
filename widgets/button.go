@@ -6,8 +6,8 @@ import (
 )
 
 type Button struct {
-	X, Y int
-	W, H int
+	x, y int
+	w, h int
 
 	text   string
 	Buffer *engine.Buffer
@@ -20,8 +20,8 @@ func (b *Button) SetText(newText string) {
 	b.text = newText
 
 	width := utf8.RuneCountInString(newText)
-	b.W, b.H = GetActuallySize(true, width, 1)
-	b.Buffer = engine.NewBuffer(b.W, b.H)
+	b.w, b.h = GetActuallySize(true, width, 1)
+	b.Buffer = engine.NewBuffer(b.w, b.h)
 }
 
 func NewButton(x, y int, text string, onClick func()) *Button {
@@ -32,18 +32,22 @@ func NewButton(x, y int, text string, onClick func()) *Button {
 
 	return &Button{
 		text:      text,
-		X:         x,
-		Y:         y,
-		W:         width,
-		H:         height,
+		x:         x,
+		y:         y,
+		w:         width,
+		h:         height,
 		Buffer:    buf,
 		isFocused: false,
 		OnClick:   onClick,
 	}
 }
 
-func (b *Button) Coords() (x, y int) {
-	return b.X, b.Y
+func (b *Button) GetCoords() (x, y int) {
+	return b.x, b.y
+}
+
+func (b *Button) GetSize() (w, h int) {
+	return b.w, b.h
 }
 
 func (b *Button) GetBuffer() [][]rune {
@@ -80,22 +84,22 @@ func (b *Button) Render() {
 		tl, tr, bl, br = '┌', '┐', '└', '┘'
 	}
 
-	for x := 1; x < b.W-1; x++ {
+	for x := 1; x < b.w-1; x++ {
 		b.Buffer.Data[0][x] = hLine
-		b.Buffer.Data[b.H-1][x] = hLine
+		b.Buffer.Data[b.h-1][x] = hLine
 	}
 
-	for y := 1; y < b.H-1; y++ {
+	for y := 1; y < b.h-1; y++ {
 		b.Buffer.Data[y][0] = vLine
-		b.Buffer.Data[y][b.W-1] = vLine
+		b.Buffer.Data[y][b.w-1] = vLine
 	}
 
 	b.Buffer.Data[0][0] = tl
-	b.Buffer.Data[0][b.W-1] = tr
-	b.Buffer.Data[b.H-1][0] = bl
-	b.Buffer.Data[b.H-1][b.W-1] = br
+	b.Buffer.Data[0][b.w-1] = tr
+	b.Buffer.Data[b.h-1][0] = bl
+	b.Buffer.Data[b.h-1][b.w-1] = br
 
-	textW := b.W - 2
+	textW := b.w - 2
 	textH := 1
 
 	for i, let := range b.text {

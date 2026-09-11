@@ -3,8 +3,8 @@ package widgets
 import "cli-graphics/engine"
 
 type Box struct {
-	W, H int
-	X, Y int
+	w, h int
+	x, y int
 
 	Buffer *engine.Buffer
 
@@ -20,10 +20,10 @@ func (b *Box) IsFocused() bool {
 
 func NewBox(x, y, w, h int) *Box {
 	return &Box{
-		W:      w,
-		H:      h,
-		X:      x,
-		Y:      y,
+		w:      w,
+		h:      h,
+		x:      x,
+		y:      y,
 		Buffer: engine.NewBuffer(w, h),
 	}
 }
@@ -32,31 +32,34 @@ func (b *Box) GetBuffer() [][]rune {
 	return b.Buffer.GetObjects()
 }
 
-func (b *Box) Coords() (x, y int) {
-	return b.X, b.Y
+func (b *Box) GetCoords() (x, y int) {
+	return b.x, b.y
 }
 
+func (b *Box) GetSize() (w, h int) {
+	return b.w, b.h
+}
 func (b *Box) Render() {
 	b.Buffer.Clear()
 
-	for x := 1; x < b.W-1; x++ {
+	for x := 1; x < b.w-1; x++ {
 		b.Buffer.Data[0][x] = '─'
-		b.Buffer.Data[b.H-1][x] = '─'
+		b.Buffer.Data[b.h-1][x] = '─'
 	}
 
-	for y := 1; y < b.H-1; y++ {
+	for y := 1; y < b.h-1; y++ {
 		b.Buffer.Data[y][0] = '│'
-		b.Buffer.Data[y][b.W-1] = '│'
+		b.Buffer.Data[y][b.w-1] = '│'
 	}
 
 	b.Buffer.Data[0][0] = '┌'
-	b.Buffer.Data[0][b.W-1] = '┐'
-	b.Buffer.Data[b.H-1][0] = '└'
-	b.Buffer.Data[b.H-1][b.W-1] = '┘'
+	b.Buffer.Data[0][b.w-1] = '┐'
+	b.Buffer.Data[b.h-1][0] = '└'
+	b.Buffer.Data[b.h-1][b.w-1] = '┘'
 
 	for _, child := range b.Children {
 		child.Render()
-		x, y := child.Coords()
+		x, y := child.GetCoords()
 		b.Buffer.Blit(child.GetBuffer(), x, y)
 	}
 }

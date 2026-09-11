@@ -5,5 +5,7 @@ type Component interface {
 
 	GetBuffer() [][]rune
 
-	Coords() (x, y int)
+	GetCoords() (x, y int)
+
+	GetSize() (w, h int)
 }

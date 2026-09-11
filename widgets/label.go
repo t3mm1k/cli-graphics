@@ -6,11 +6,11 @@ import (
 )
 
 type Label struct {
-	X, Y int
+	x, y int
 
 	text string
 
-	W, H int
+	w, h int
 
 	Border bool
 
@@ -39,39 +39,43 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 
 	return &Label{
 		text:   text,
-		X:      x,
-		Y:      y,
-		W:      width,
-		H:      height,
+		x:      x,
+		y:      y,
+		w:      width,
+		h:      height,
 		Border: border,
 		Buffer: buf,
 	}
 }
 
-func (l *Label) Coords() (x, y int) {
-	return l.X, l.Y
+func (l *Label) GetCoords() (x, y int) {
+	return l.x, l.y
+}
+
+func (l *Label) GetSize() (w, h int) {
+	return l.w, l.h
 }
 
 func (l *Label) Render() {
 
 	if l.Border {
-		for x := 1; x < l.W-1; x++ {
+		for x := 1; x < l.w-1; x++ {
 			l.Buffer.Data[0][x] = '─'
-			l.Buffer.Data[l.H-1][x] = '─'
+			l.Buffer.Data[l.h-1][x] = '─'
 		}
 
-		for y := 1; y < l.H-1; y++ {
+		for y := 1; y < l.h-1; y++ {
 			l.Buffer.Data[y][0] = '│'
-			l.Buffer.Data[y][l.W-1] = '│'
+			l.Buffer.Data[y][l.w-1] = '│'
 		}
 
 		l.Buffer.Data[0][0] = '┌'
-		l.Buffer.Data[0][l.W-1] = '┐'
-		l.Buffer.Data[l.H-1][0] = '└'
-		l.Buffer.Data[l.H-1][l.W-1] = '┘'
+		l.Buffer.Data[0][l.w-1] = '┐'
+		l.Buffer.Data[l.h-1][0] = '└'
+		l.Buffer.Data[l.h-1][l.w-1] = '┘'
 	}
 
-	var textW, textH int = l.W, 0
+	var textW, textH int = l.w, 0
 
 	if l.Border {
 		textH = 1

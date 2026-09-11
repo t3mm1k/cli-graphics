@@ -6,7 +6,7 @@ import (
 )
 
 type ListView struct {
-	W, H, X, Y int
+	w, h, x, y int
 
 	Lines []string
 
@@ -17,17 +17,21 @@ func NewList(w, h, x, y int, lines []string) *ListView {
 	buf := engine.NewBuffer(w, h)
 
 	return &ListView{
-		W:      w,
-		H:      h,
-		X:      x,
-		Y:      y,
+		w:      w,
+		h:      h,
+		x:      x,
+		y:      y,
 		Lines:  lines,
 		Buffer: buf,
 	}
 }
 
-func (l *ListView) Coords() (x, y int) {
-	return l.X, l.Y
+func (l *ListView) GetCoords() (x, y int) {
+	return l.x, l.y
+}
+
+func (l *ListView) GetSize() (w, h int) {
+	return l.w, l.h
 }
 
 func (l *ListView) GetBuffer() [][]rune {
@@ -35,28 +39,28 @@ func (l *ListView) GetBuffer() [][]rune {
 }
 
 func (l *ListView) Render() {
-	for x := 1; x < l.W-1; x++ {
+	for x := 1; x < l.w-1; x++ {
 		l.Buffer.Data[0][x] = '─'
-		l.Buffer.Data[l.H-1][x] = '─'
+		l.Buffer.Data[l.h-1][x] = '─'
 	}
 
-	for y := 1; y < l.H-1; y++ {
+	for y := 1; y < l.h-1; y++ {
 		l.Buffer.Data[y][0] = '│'
-		l.Buffer.Data[y][l.W-1] = '│'
+		l.Buffer.Data[y][l.w-1] = '│'
 	}
 
 	l.Buffer.Data[0][0] = '┌'
-	l.Buffer.Data[0][l.W-1] = '┐'
-	l.Buffer.Data[l.H-1][0] = '└'
-	l.Buffer.Data[l.H-1][l.W-1] = '┘'
+	l.Buffer.Data[0][l.w-1] = '┐'
+	l.Buffer.Data[l.w-1][0] = '└'
+	l.Buffer.Data[l.h-1][l.w-1] = '┘'
 
 	for i, line := range l.Lines {
-		if i >= l.H-2 {
+		if i >= l.h-2 {
 			break
 		}
 
 		source := []rune("• " + line)
-		maxBufferAvailable := l.W - 2
+		maxBufferAvailable := l.w - 2
 
 		if len(source) > maxBufferAvailable {
 			source = source[:maxBufferAvailable]
