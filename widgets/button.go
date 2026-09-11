@@ -13,7 +13,15 @@ type Button struct {
 	Buffer *engine.Buffer
 
 	isFocused bool
-	onClick   func()
+	OnClick   func()
+}
+
+func (b *Button) SetText(newText string) {
+	b.text = newText
+
+	width := utf8.RuneCountInString(newText)
+	b.W, b.H = GetActuallySize(true, width, 1)
+	b.Buffer = engine.NewBuffer(b.W, b.H)
 }
 
 func NewButton(x, y int, text string, onClick func()) *Button {
@@ -30,7 +38,7 @@ func NewButton(x, y int, text string, onClick func()) *Button {
 		H:         height,
 		Buffer:    buf,
 		isFocused: false,
-		onClick:   onClick,
+		OnClick:   onClick,
 	}
 }
 
@@ -52,8 +60,8 @@ func (b *Button) IsFocused() bool {
 
 func (b *Button) HandleKey(key string) bool {
 	if key == "Enter" || key == " " {
-		if b.onClick != nil {
-			b.onClick()
+		if b.OnClick != nil {
+			b.OnClick()
 		}
 		return true
 	}
