@@ -56,7 +56,6 @@ func ReadKey() string {
 	return "Unknown"
 }
 func main() {
-
 	keyEvents := make(chan string)
 	ticker := time.NewTicker(500 * time.Millisecond)
 
@@ -84,9 +83,9 @@ func main() {
 		input.SetValue(value + key)
 	}
 
-	window1.AddChild(buttonInBox)
 	rootScreen.AddChild(input)
 
+	window1.AddChild(buttonInBox)
 	rootScreen.AddChild(window1)
 	rootScreen.AddChild(list)
 	rootScreen.AddChild(button)
@@ -101,6 +100,8 @@ func main() {
 		case key := <-keyEvents:
 			if key == "Ctrl+C" {
 				return
+			}
+			if key == "Ctrl+X" {
 			}
 
 			if key == "Tab" {

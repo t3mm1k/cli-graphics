@@ -4,6 +4,8 @@ import (
 	"cli-graphics/engine"
 	"cli-graphics/utils"
 	"unicode/utf8"
+
+	"github.com/google/uuid"
 )
 
 type Label struct {
@@ -20,13 +22,15 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 	} else {
 		width = utf8.RuneCountInString(text)
 	}
-
 	width, height := utils.GetActuallySize(border, width, 1)
 
-	return &Label{
-		BaseComponent: engine.NewBaseComponent(x, y, width, height, border),
+	id := uuid.New()
+	lbl := &Label{
+		BaseComponent: engine.NewBaseComponent(id, x, y, width, height, border),
 		text:          text,
 	}
+
+	return lbl
 }
 
 func (l *Label) Render() {

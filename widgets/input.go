@@ -1,11 +1,15 @@
 package widgets
 
-import "cli-graphics/engine"
+import (
+	"cli-graphics/engine"
+
+	"github.com/google/uuid"
+)
 
 type Input struct {
 	engine.BaseComponent
 
-	value string
+	value string //TODO ПОМЕНЯТЬ НА []rune
 
 	isFocused bool
 
@@ -80,10 +84,12 @@ func (i *Input) Render() {
 }
 
 func NewInput(x, y, w int, onInput func(key string)) *Input {
-
-	return &Input{
-		BaseComponent:   engine.NewBaseComponent(x, y, w, 3, true),
+	id := uuid.New()
+	btn := &Input{
+		BaseComponent:   engine.NewBaseComponent(id, x, y, w, 3, true),
 		OnInput:         onInput,
 		cursorIsVisible: false,
 	}
+
+	return btn
 }

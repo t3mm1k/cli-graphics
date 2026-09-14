@@ -1,15 +1,19 @@
 package engine
 
+import "github.com/google/uuid"
+
 type BaseComponent struct {
+	id     uuid.UUID
 	x, y   int
 	w, h   int
 	Buffer *Buffer
 	Border bool
 }
 
-func NewBaseComponent(x, y, w, h int, border bool) BaseComponent {
+func NewBaseComponent(id uuid.UUID, x, y, w, h int, border bool) BaseComponent {
 	return BaseComponent{
-		x: x, y: y, w: w, h: h,
+		id: id,
+		x:  x, y: y, w: w, h: h,
 		Buffer: NewBuffer(w, h),
 		Border: border,
 	}
@@ -57,6 +61,10 @@ func (b *BaseComponent) GetSize() (w, h int) {
 
 func (b *BaseComponent) SetSize(w, h int) {
 	b.w, b.h = w, h
+}
+
+func (b *BaseComponent) GetId() uuid.UUID {
+	return b.id
 }
 
 func (b *BaseComponent) GetCoords() (x, y int) {

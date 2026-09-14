@@ -1,6 +1,10 @@
 package widgets
 
-import "cli-graphics/engine"
+import (
+	"cli-graphics/engine"
+
+	"github.com/google/uuid"
+)
 
 type Box struct {
 	engine.BaseComponent
@@ -15,9 +19,14 @@ func (b *Box) IsFocused() bool {
 }
 
 func NewBox(x, y, w, h int) *Box {
-	return &Box{
-		BaseComponent: engine.NewBaseComponent(x, y, w, h, true),
+	id := uuid.New()
+
+	box := &Box{
+		BaseComponent: engine.NewBaseComponent(id, x, y, w, h, true),
 	}
+
+	engine.Registry.Add(box)
+	return box
 }
 
 func (b *Box) GetBuffer() [][]rune {

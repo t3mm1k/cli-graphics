@@ -4,6 +4,8 @@ import (
 	"cli-graphics/engine"
 	"cli-graphics/utils"
 	"unicode/utf8"
+
+	"github.com/google/uuid"
 )
 
 type Button struct {
@@ -16,15 +18,19 @@ type Button struct {
 }
 
 func NewButton(x, y int, text string, onClick func()) *Button {
+	id := uuid.New()
 	width := utf8.RuneCountInString(text)
 	width, height := utils.GetActuallySize(true, width, 1)
-
-	return &Button{
-		BaseComponent: engine.NewBaseComponent(x, y, width, height, true),
+	btn := &Button{
+		BaseComponent: engine.NewBaseComponent(id, x, y, width, height, true),
 		text:          text,
 		isFocused:     false,
 		OnClick:       onClick,
 	}
+
+	engine.Registry.Add(btn)
+
+	return btn
 }
 
 func (b *Button) SetText(newText string) {

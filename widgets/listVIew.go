@@ -3,6 +3,8 @@ package widgets
 import (
 	"cli-graphics/engine"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type ListView struct {
@@ -12,10 +14,13 @@ type ListView struct {
 }
 
 func NewList(w, h, x, y int, lines []string) *ListView {
-	return &ListView{
-		BaseComponent: engine.NewBaseComponent(x, y, w, h, true),
+	id := uuid.New()
+	list := &ListView{
+		BaseComponent: engine.NewBaseComponent(id, x, y, w, h, true),
 		Lines:         lines,
 	}
+
+	return list
 }
 
 func (l *ListView) GetBuffer() [][]rune {
