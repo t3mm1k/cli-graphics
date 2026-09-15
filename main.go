@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cli-graphics/engine"
 	"cli-graphics/widgets"
 	"fmt"
 	"os"
@@ -56,13 +57,13 @@ func ReadKey() string {
 	return "Unknown"
 }
 func main() {
-	keyEvents := make(chan string)
+	EventsQ := make(chan engine.Event)
 	ticker := time.NewTicker(500 * time.Millisecond)
 
 	go func() {
 		for {
 			key := ReadKey()
-			keyEvents <- key
+			EventsQ <- &engine.KeyEvent{Key: key}
 		}
 	}()
 
@@ -97,20 +98,24 @@ func main() {
 
 	for {
 		select {
-		case key := <-keyEvents:
-			if key == "Ctrl+C" {
-				return
-			}
-			if key == "Ctrl+X" {
+		case event := <-EventsQ:
+			switch v := event.(type) {
+			case *engine.KeyEvent:
+				if v.Key == "Ctrl+C" {
+					return
+				}
+				if v.Key == "Ctrl+X" {
+				}
+
+				if v.Key == "Tab" {
+					if !rootScreen.HandleKey("Tab") {
+						rootScreen.SetFocus(true)
+					}
+				} else {
+					rootScreen.HandleKey(v.Key)
+				}
 			}
 
-			if key == "Tab" {
-				if !rootScreen.HandleKey("Tab") {
-					rootScreen.SetFocus(true)
-				}
-			} else {
-				rootScreen.HandleKey(key)
-			}
 		case <-ticker.C:
 			//TODO подумать про логику on tick чтобы не ререндерить лишнего... хотя вероятно это не будет проблемой.
 			//TODO в будущем подумать о рендере как в реакте, ререндер только того что изменилось а это сложно(((

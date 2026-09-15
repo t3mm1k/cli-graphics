@@ -3,7 +3,7 @@ package engine
 type Event interface{}
 
 type KeyEvent struct {
-	key string
+	Key string
 }
 
 type RerenderEvent struct {
