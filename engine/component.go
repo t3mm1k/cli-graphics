@@ -14,4 +14,6 @@ type Component interface {
 	GetId() uuid.UUID
 
 	OnTick()
+
+	Rerender()
 }

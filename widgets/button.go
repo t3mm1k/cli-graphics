@@ -17,6 +17,13 @@ type Button struct {
 	OnClick   func()
 }
 
+func (b *Button) Rerender() {
+	width := utf8.RuneCountInString(b.text)
+	width, height := utils.GetActuallySize(true, width, 1)
+	b.SetSize(width, height)
+	b.Buffer = engine.NewBuffer(width, height)
+}
+
 func NewButton(x, y int, text string, onClick func()) *Button {
 	id := uuid.New()
 	width := utf8.RuneCountInString(text)
@@ -28,18 +35,16 @@ func NewButton(x, y int, text string, onClick func()) *Button {
 		OnClick:       onClick,
 	}
 
-	engine.Registry.Add(btn)
+	engine.Registry.AddComponent(btn)
 
 	return btn
 }
 
 func (b *Button) SetText(newText string) {
 	b.text = newText
+	b.Rerender()
 
-	width := utf8.RuneCountInString(newText)
-
-	b.SetSize(utils.GetActuallySize(true, width, 1))
-	b.Buffer = engine.NewBuffer(b.GetSize())
+	engine.EventsQ <- engine.RerenderEvent{ComponentId: b.GetId()}
 }
 
 func (b *Button) GetBuffer() [][]rune {

@@ -13,12 +13,19 @@ type ListView struct {
 	Lines []string
 }
 
+func (l *ListView) Rerender() {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewList(w, h, x, y int, lines []string) *ListView {
 	id := uuid.New()
 	list := &ListView{
 		BaseComponent: engine.NewBaseComponent(id, x, y, w, h, true),
 		Lines:         lines,
 	}
+
+	engine.Registry.AddComponent(list)
 
 	return list
 }

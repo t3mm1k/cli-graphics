@@ -14,6 +14,11 @@ type Label struct {
 	engine.BaseComponent
 }
 
+func (l *Label) Rerender() {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 	var width int
 
@@ -29,6 +34,8 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 		BaseComponent: engine.NewBaseComponent(id, x, y, width, height, border),
 		text:          text,
 	}
+
+	engine.Registry.AddComponent(lbl)
 
 	return lbl
 }

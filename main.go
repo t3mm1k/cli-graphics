@@ -8,6 +8,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/google/uuid"
 	"golang.org/x/term"
 )
 
@@ -57,13 +58,12 @@ func ReadKey() string {
 	return "Unknown"
 }
 func main() {
-	EventsQ := make(chan engine.Event)
 	ticker := time.NewTicker(500 * time.Millisecond)
 
 	go func() {
 		for {
 			key := ReadKey()
-			EventsQ <- &engine.KeyEvent{Key: key}
+			engine.EventsQ <- &engine.KeyEvent{Key: key}
 		}
 	}()
 
@@ -75,7 +75,7 @@ func main() {
 	button1 := widgets.NewButton(46, 20, "but1", func() { fmt.Println("but1") })
 	buttonInBox := widgets.NewButton(1, 2, "Click me", nil)
 	buttonInBox.OnClick = func() {
-		buttonInBox.SetText("Clicked!")
+		buttonInBox.SetText("Clicked")
 	}
 	labelWithoutBorder := widgets.NewLabel(40, 15, true, "lab")
 	input := widgets.NewInput(1, 2, 18, nil)
@@ -98,28 +98,46 @@ func main() {
 
 	for {
 		select {
-		case event := <-EventsQ:
-			switch v := event.(type) {
+		case event := <-engine.EventsQ:
+			switch e := event.(type) {
 			case *engine.KeyEvent:
-				if v.Key == "Ctrl+C" {
+
+				if e.Key == "Ctrl+C" {
 					return
 				}
-				if v.Key == "Ctrl+X" {
+				if e.Key == "Ctrl+X" {
 				}
 
-				if v.Key == "Tab" {
+				if e.Key == "Tab" {
 					if !rootScreen.HandleKey("Tab") {
 						rootScreen.SetFocus(true)
 					}
 				} else {
-					rootScreen.HandleKey(v.Key)
+					rootScreen.HandleKey(e.Key)
+				}
+			case *engine.RerenderEvent:
+				currentId := e.ComponentId
+
+				for currentId != uuid.Nil {
+					comp, exists := engine.Registry.GetComponent(currentId)
+					if !exists {
+						break
+					}
+
+					if container, ok := comp.(engine.Container); ok {
+						container.CompositeChildren()
+					}
+
+					parentId, hasParent := engine.Registry.GetParent(currentId)
+					if !hasParent {
+						break
+					}
+
+					currentId = parentId
 				}
 			}
 
 		case <-ticker.C:
-			//TODO подумать про логику on tick чтобы не ререндерить лишнего... хотя вероятно это не будет проблемой.
-			//TODO в будущем подумать о рендере как в реакте, ререндер только того что изменилось а это сложно(((
-
 			rootScreen.OnTick()
 			rootScreen.Render()
 		}

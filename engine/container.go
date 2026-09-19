@@ -5,4 +5,5 @@ type Container interface {
 
 	AddChild(child Component)
 	FindNextFocusableChild(st int)
+	CompositeChildren()
 }

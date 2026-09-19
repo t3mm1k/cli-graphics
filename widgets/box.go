@@ -14,6 +14,11 @@ type Box struct {
 	focused      bool
 }
 
+func (b *Box) Rerender() {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b *Box) IsFocused() bool {
 	return b.focused
 }
@@ -25,7 +30,7 @@ func NewBox(x, y, w, h int) *Box {
 		BaseComponent: engine.NewBaseComponent(id, x, y, w, h, true),
 	}
 
-	engine.Registry.Add(box)
+	engine.Registry.AddComponent(box)
 	return box
 }
 
@@ -47,6 +52,13 @@ func (b *Box) Render() {
 	}
 }
 
+func (b *Box) CompositeChildren() {
+	for _, child := range b.Children {
+		x, y := child.GetCoords()
+		b.Buffer.Blit(child.GetBuffer(), x, y)
+	}
+}
+
 func (b *Box) OnTick() {
 	for _, child := range b.Children {
 		child.OnTick()
@@ -55,6 +67,7 @@ func (b *Box) OnTick() {
 
 func (b *Box) AddChild(child engine.Component) {
 	b.Children = append(b.Children, child)
+	engine.Registry.SetParent(child.GetId(), b.GetId())
 }
 
 func (b *Box) FindNextFocusableChild(st int) int {

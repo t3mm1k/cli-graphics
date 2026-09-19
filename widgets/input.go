@@ -18,6 +18,11 @@ type Input struct {
 	OnInput func(key string)
 }
 
+func (i *Input) Rerender() {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (i *Input) SetFocus(focused bool) {
 	if focused == false {
 		i.cursorIsVisible = false
@@ -85,11 +90,13 @@ func (i *Input) Render() {
 
 func NewInput(x, y, w int, onInput func(key string)) *Input {
 	id := uuid.New()
-	btn := &Input{
+	input := &Input{
 		BaseComponent:   engine.NewBaseComponent(id, x, y, w, 3, true),
 		OnInput:         onInput,
 		cursorIsVisible: false,
 	}
 
-	return btn
+	engine.Registry.AddComponent(input)
+
+	return input
 }
