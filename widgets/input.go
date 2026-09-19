@@ -52,20 +52,51 @@ func (i *Input) IsFocused() bool {
 func (i *Input) HandleKey(key string) bool {
 	if key == "Tab" {
 		return false
-	} else if key == "Enter" {
+	} 
 
-	} else if key == "Backspace" {
-		// TODO пофиксить бекспейс на русской раскладке(
-		if len(i.value) == 0 {
+	switch key {
+	case "Enter":
+
+	case "Backspace":
+		if len(i.value) == 0 || i.cursorPos == 0 {
 			return true
 		}
-		i.value = i.value[:len(i.value)-1]
-	} else {
 
-		if i.OnInput != nil {
-			i.OnInput(key)
+		i.value = append(i.value[:i.cursorPos-1], i.value[i.cursorPos:]...)
+		i.cursorPos--
+	case "Left", "ArrowLeft":
+		if i.cursorPos > 0 {
+			i.cursorPos--
+		}
+	case "Right", "ArrowRight":
+		if i.cursorPos < len(i.value) {
+			i.cursorPos++
+		}
+
+	default:
+		if i.Filter != nil && !i.Filter(key) {
+			return true
+		}
+
+		runes := []rune(key)
+		if len(runes) == 1 {
+
+			charToInsert := runes[0]
+			
+			res := make([]rune, 0, len(i.value)+1)
+			res = append(res, i.value[:i.cursorPos]...)
+			res = append(res, charToInsert)
+			res = append(res, i.value[i.cursorPos:]...)
+			
+			i.value = res
+			i.cursorPos++
+
+			if i.OnInput != nil {
+				i.OnInput(key)
+			}
 		}
 	}
+	
 	return true
 }
 
