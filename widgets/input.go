@@ -15,7 +15,11 @@ type Input struct {
 
 	cursorIsVisible bool
 
+	cursorPos int
+
 	OnInput func(key string)
+
+	Filter  func(key string) bool
 }
 
 func (i *Input) Rerender() {
