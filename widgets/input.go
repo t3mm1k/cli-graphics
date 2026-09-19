@@ -16,6 +16,8 @@ type Input struct {
 	cursorIsVisible bool
 
 	OnInput func(key string)
+
+	Filter  func(key string) bool 
 }
 
 func (i *Input) Rerender() {
