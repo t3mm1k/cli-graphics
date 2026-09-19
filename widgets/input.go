@@ -57,8 +57,20 @@ func (i *Input) HandleKey(key string) bool {
 		i.value = i.value[:len(i.value)-1]
 	} else {
 
+		runesKey := []rune(key)
+		if len(runesKey) > 1 && key != "Space" {
+			return true
+		}
+		inputChar := key
+		if inputChar == "Space" {
+			inputChar = " "
+		}
+		if i.Filter != nil && !i.Filter(inputChar) {
+			return true
+		}
+
 		if i.OnInput != nil {
-			i.OnInput(key)
+			i.OnInput(inputChar)
 		}
 	}
 	return true
