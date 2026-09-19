@@ -2,6 +2,7 @@ package widgets
 
 import (
 	"cli-graphics/engine"
+	"unicode"
 
 	"github.com/google/uuid"
 )
@@ -28,10 +29,12 @@ func (i *Input) Rerender() {
 }
 
 func (i *Input) SetFocus(focused bool) {
-	if focused == false {
-		i.cursorIsVisible = false
-	}
-	i.isFocused = focused
+    i.isFocused = focused
+    if focused {
+        i.cursorIsVisible = true
+    } else {
+        i.cursorIsVisible = false
+    }
 }
 
 func (i *Input) GetValue() []rune {
@@ -61,17 +64,21 @@ func (i *Input) HandleKey(key string) bool {
 		if len(i.value) == 0 || i.cursorPos == 0 {
 			return true
 		}
-
+		
 		i.value = append(i.value[:i.cursorPos-1], i.value[i.cursorPos:]...)
 		i.cursorPos--
+
 	case "Left", "ArrowLeft":
 		if i.cursorPos > 0 {
 			i.cursorPos--
 		}
+		return true
+
 	case "Right", "ArrowRight":
 		if i.cursorPos < len(i.value) {
 			i.cursorPos++
 		}
+		return true
 
 	default:
 		if i.Filter != nil && !i.Filter(key) {
@@ -142,6 +149,15 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 		BaseComponent:   engine.NewBaseComponent(id, x, y, w, 3, true),
 		OnInput:         onInput,
 		cursorIsVisible: false,
+		cursorPos:       0,
+		Filter:          func(key string) bool {
+			runes := []rune(key)
+			if len(runes) != 1 {
+				return false
+			}
+			r := runes[0]
+			return unicode.IsLetter(r) || unicode.IsDigit(r) || unicode.IsPunct(r) || unicode.IsSymbol(r) || r == ' '
+		},
 	}
 
 	engine.Registry.AddComponent(input)
