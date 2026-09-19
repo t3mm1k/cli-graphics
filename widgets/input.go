@@ -40,6 +40,9 @@ func (i *Input) GetValue() []rune {
 
 func (i *Input) SetValue(value []rune) {
 	i.value = value
+	if i.cursorPos > len(value) {
+		i.cursorPos = len(value)
+	}
 }
 
 func (i *Input) IsFocused() bool {
