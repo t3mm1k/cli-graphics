@@ -96,7 +96,7 @@ func (i *Input) HandleKey(key string) bool {
 			}
 		}
 	}
-	
+
 	return true
 }
 
@@ -112,17 +112,27 @@ func (i *Input) Render() {
 
 	w, _ := i.GetSize()
 	textW := w - 2
-	runes := []rune(i.value)
-	start := len(runes) - textW + 1
-	if start < 0 {
-		start = 0
+	if textW <= 0 {
+		return
 	}
-	text := runes[start:]
-	if i.cursorIsVisible {
-		text = append(text, '_')
+
+	start := 0
+	if i.cursorPos >= textW {
+		start = i.cursorPos - textW + 1
 	}
-	for j, let := range text {
-		i.Buffer.Data[1][j+1] = let
+
+	for j := 0; j < textW; j++ {
+		strIndex := start + j
+		if strIndex < len(i.value) {
+			i.Buffer.Data[1][j+1] = i.value[strIndex]
+		}
+	}
+
+	if i.isFocused && i.cursorIsVisible {
+		visualCursorPos := i.cursorPos - start
+		if visualCursorPos >= 0 && visualCursorPos < textW {
+			i.Buffer.Data[1][visualCursorPos+1] = '_'
+		}
 	}
 }
 
