@@ -9,7 +9,7 @@ import (
 type Input struct {
 	engine.BaseComponent
 
-	value string //TODO ПОМЕНЯТЬ НА []rune
+	value []rune //TODO ПОМЕНЯТЬ НА []rune
 
 	isFocused bool
 
@@ -30,11 +30,11 @@ func (i *Input) SetFocus(focused bool) {
 	i.isFocused = focused
 }
 
-func (i *Input) GetValue() string {
+func (i *Input) GetValue() []rune {
 	return i.value
 }
 
-func (i *Input) SetValue(value string) {
+func (i *Input) SetValue(value []rune) {
 	i.value = value
 }
 

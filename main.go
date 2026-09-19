@@ -81,7 +81,7 @@ func main() {
 	input := widgets.NewInput(1, 2, 18, nil)
 	input.OnInput = func(key string) {
 		value := input.GetValue()
-		input.SetValue(value + key)
+		input.SetValue(append(value, []rune(key)...))
 	}
 
 	rootScreen.AddChild(input)
