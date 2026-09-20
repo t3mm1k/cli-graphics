@@ -81,26 +81,29 @@ func (i *Input) HandleKey(key string) bool {
 		return true
 
 	default:
-		if i.Filter != nil && !i.Filter(key) {
+		runesKey := []rune(key)
+		if len(runesKey) > 1 && key != "Space" {
 			return true
 		}
 
-		runes := []rune(key)
-		if len(runes) == 1 {
+		inputChar := key
+		if inputChar == "Space" {
+			inputChar = " "
+		}
 
-			charToInsert := runes[0]
-			
-			res := make([]rune, 0, len(i.value)+1)
-			res = append(res, i.value[:i.cursorPos]...)
-			res = append(res, charToInsert)
-			res = append(res, i.value[i.cursorPos:]...)
-			
-			i.value = res
-			i.cursorPos++
+		if i.Filter != nil && !i.Filter(inputChar) {
+			return true
+		}
+		charToInsert := runesKey[0]
+		if inputChar == " " {
+			charToInsert = ' '
+		}
 
-			if i.OnInput != nil {
-				i.OnInput(key)
-			}
+		i.value = append(i.value[:i.cursorPos], append([]rune{charToInsert}, i.value[i.cursorPos:]...)...)
+		i.cursorPos++
+
+		if i.OnInput != nil {
+		i.OnInput(inputChar)
 		}
 	}
 
