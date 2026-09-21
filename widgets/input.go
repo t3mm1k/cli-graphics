@@ -2,6 +2,7 @@ package widgets
 
 import (
 	"cli-graphics/engine"
+	"unicode"
 
 	"github.com/google/uuid"
 )
@@ -15,9 +16,11 @@ type Input struct {
 
 	cursorIsVisible bool
 
+	cursorPos int
+
 	OnInput func(key string)
 
-	Filter  func(key string) bool 
+	Filter  func(key string) bool
 }
 
 func (i *Input) Rerender() {
@@ -26,10 +29,12 @@ func (i *Input) Rerender() {
 }
 
 func (i *Input) SetFocus(focused bool) {
-	if focused == false {
-		i.cursorIsVisible = false
-	}
-	i.isFocused = focused
+    i.isFocused = focused
+    if focused {
+        i.cursorIsVisible = true
+    } else {
+        i.cursorIsVisible = false
+    }
 }
 
 func (i *Input) GetValue() []rune {
@@ -38,6 +43,9 @@ func (i *Input) GetValue() []rune {
 
 func (i *Input) SetValue(value []rune) {
 	i.value = value
+	if i.cursorPos > len(value) {
+		i.cursorPos = len(value)
+	}
 }
 
 func (i *Input) IsFocused() bool {
@@ -47,32 +55,58 @@ func (i *Input) IsFocused() bool {
 func (i *Input) HandleKey(key string) bool {
 	if key == "Tab" {
 		return false
-	} else if key == "Enter" {
+	} 
 
-	} else if key == "Backspace" {
-		// TODO пофиксить бекспейс на русской раскладке(
-		if len(i.value) == 0 {
+	switch key {
+	case "Enter":
+
+	case "Backspace":
+		if len(i.value) == 0 || i.cursorPos == 0 {
 			return true
 		}
-		i.value = i.value[:len(i.value)-1]
-	} else {
+		
+		i.value = append(i.value[:i.cursorPos-1], i.value[i.cursorPos:]...)
+		i.cursorPos--
 
+	case "Left", "ArrowLeft":
+		if i.cursorPos > 0 {
+			i.cursorPos--
+		}
+		return true
+
+	case "Right", "ArrowRight":
+		if i.cursorPos < len(i.value) {
+			i.cursorPos++
+		}
+		return true
+
+	default:
 		runesKey := []rune(key)
 		if len(runesKey) > 1 && key != "Space" {
 			return true
 		}
+
 		inputChar := key
 		if inputChar == "Space" {
 			inputChar = " "
 		}
+
 		if i.Filter != nil && !i.Filter(inputChar) {
 			return true
 		}
+		charToInsert := runesKey[0]
+		if inputChar == " " {
+			charToInsert = ' '
+		}
+
+		i.value = append(i.value[:i.cursorPos], append([]rune{charToInsert}, i.value[i.cursorPos:]...)...)
+		i.cursorPos++
 
 		if i.OnInput != nil {
-			i.OnInput(inputChar)
+		i.OnInput(inputChar)
 		}
 	}
+
 	return true
 }
 
@@ -88,17 +122,27 @@ func (i *Input) Render() {
 
 	w, _ := i.GetSize()
 	textW := w - 2
-	runes := []rune(i.value)
-	start := len(runes) - textW + 1
-	if start < 0 {
-		start = 0
+	if textW <= 0 {
+		return
 	}
-	text := runes[start:]
-	if i.cursorIsVisible {
-		text = append(text, '_')
+
+	start := 0
+	if i.cursorPos >= textW {
+		start = i.cursorPos - textW + 1
 	}
-	for j, let := range text {
-		i.Buffer.Data[1][j+1] = let
+
+	for j := 0; j < textW; j++ {
+		strIndex := start + j
+		if strIndex < len(i.value) {
+			i.Buffer.Data[1][j+1] = i.value[strIndex]
+		}
+	}
+
+	if i.isFocused && i.cursorIsVisible {
+		visualCursorPos := i.cursorPos - start
+		if visualCursorPos >= 0 && visualCursorPos < textW {
+			i.Buffer.Data[1][visualCursorPos+1] = '_'
+		}
 	}
 }
 
@@ -108,6 +152,15 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 		BaseComponent:   engine.NewBaseComponent(id, x, y, w, 3, true),
 		OnInput:         onInput,
 		cursorIsVisible: false,
+		cursorPos:       0,
+		Filter:          func(key string) bool {
+			runes := []rune(key)
+			if len(runes) != 1 {
+				return false
+			}
+			r := runes[0]
+			return unicode.IsLetter(r) || unicode.IsDigit(r) || unicode.IsPunct(r) || unicode.IsSymbol(r) || r == ' '
+		},
 	}
 
 	engine.Registry.AddComponent(input)

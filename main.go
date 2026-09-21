@@ -79,10 +79,6 @@ func main() {
 	}
 	labelWithoutBorder := widgets.NewLabel(40, 15, true, "lab")
 	input := widgets.NewInput(1, 2, 18, nil)
-	input.OnInput = func(key string) {
-		value := input.GetValue()
-		input.SetValue(append(value, []rune(key)...))
-	}
 
 	rootScreen.AddChild(input)
 
@@ -92,6 +88,7 @@ func main() {
 	rootScreen.AddChild(button)
 	rootScreen.AddChild(button1)
 	rootScreen.AddChild(labelWithoutBorder)
+	rootScreen.SetFocus(true)
 	rootScreen.Render()
 
 	rootScreen.Buffer.Flush()
