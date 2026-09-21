@@ -134,7 +134,6 @@ func main() {
 
 					currentId = parentId
 				}
-				// needFullRender = false — только частичный ререндер
 			}
 
 		case <-ticker.C:
