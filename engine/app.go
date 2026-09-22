@@ -20,6 +20,9 @@ type App struct {
 	stopChan chan struct{}
 
 	oldTermState *term.State
+
+	enableLogging bool
+	logFile       *os.File
 }
 
 func NewApp(root Component) *App {
@@ -31,14 +34,35 @@ func NewApp(root Component) *App {
 	}
 }
 
+func (app *App) SetLogging(enable bool) *App {
+	app.enableLogging = enable
+	return app
+}
+
 func (app *App) setTickRate(tickRate time.Duration) {
 	app.tickRate = tickRate
 }
 
 func (a *App) Run() error {
+	if a.root == nil {
+		return NilRootError
+	}
+	if a.running {
+		return AppAlreadyRunningError
+	}
+
+	if a.enableLogging {
+		f, err := enableFileLogging("app.log")
+		if err != nil {
+			return fmt.Errorf("app: failed to open app.log: %w", err)
+		}
+		a.logFile = f
+	}
+
 	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
-		return fmt.Errorf("failed to enable raw mode: %w", err)
+		Log.Error("app: failed to enable raw mode", "err", err)
+		return fmt.Errorf("app: failed to enable raw mode: %w", err)
 	}
 	a.oldTermState = oldState
 
@@ -122,6 +146,12 @@ func (a *App) cleanup() {
 	}
 
 	fmt.Print("\u001B[?25h\u001B[2J\u001B[H")
+
+	if a.logFile != nil {
+		_ = a.logFile.Close()
+		resetLogger()
+		a.logFile = nil
+	}
 }
 
 func (a *App) draw() {
@@ -129,9 +159,7 @@ func (a *App) draw() {
 		return
 	}
 	a.root.Render()
-	if base, ok := a.root.(interface{ Flush() }); ok {
-		base.Flush()
-	} else if bc, ok := a.root.(Container); ok {
-		bc.Flush()
+	if flusher, ok := a.root.(interface{ Flush() }); ok {
+		flusher.Flush()
 	}
 }
