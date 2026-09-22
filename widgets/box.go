@@ -53,10 +53,12 @@ func (b *Box) Render() {
 }
 
 func (b *Box) CompositeChildren() {
-	for _, child := range b.Children {
-		x, y := child.GetCoords()
-		b.Buffer.Blit(child.GetBuffer(), x, y)
-	}
+    for _, child := range b.Children {
+        x, y := child.GetCoords()
+        w, h := child.GetSize()
+        b.Buffer.ClearRegion(x, y, w, h)
+        b.Buffer.Blit(child.GetBuffer(), x, y)
+    }
 }
 
 func (b *Box) OnTick() {

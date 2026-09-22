@@ -94,15 +94,14 @@ func main() {
 	rootScreen.Buffer.Flush()
 
 	for {
+		needFullRender := false
+
 		select {
 		case event := <-engine.EventsQ:
 			switch e := event.(type) {
 			case *engine.KeyEvent:
-
 				if e.Key == "Ctrl+C" {
 					return
-				}
-				if e.Key == "Ctrl+X" {
 				}
 
 				if e.Key == "Tab" {
@@ -112,6 +111,9 @@ func main() {
 				} else {
 					rootScreen.HandleKey(e.Key)
 				}
+
+				needFullRender = true
+
 			case *engine.RerenderEvent:
 				currentId := e.ComponentId
 
@@ -136,12 +138,13 @@ func main() {
 
 		case <-ticker.C:
 			rootScreen.OnTick()
+			needFullRender = true
+		}
+
+		if needFullRender {
 			rootScreen.Render()
 		}
 
-		rootScreen.Render()
-
 		rootScreen.Buffer.Flush()
 	}
-
 }
