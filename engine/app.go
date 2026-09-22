@@ -34,7 +34,6 @@ func NewApp(root Component) *App {
 	}
 }
 
-// SetLogging включает или выключает запись логов в файл app.log
 func (app *App) SetLogging(enable bool) *App {
 	app.enableLogging = enable
 	return app
@@ -45,19 +44,25 @@ func (app *App) setTickRate(tickRate time.Duration) {
 }
 
 func (a *App) Run() error {
+	if a.root == nil {
+		return NilRootError
+	}
+	if a.running {
+		return AppAlreadyRunningError
+	}
+
 	if a.enableLogging {
 		f, err := enableFileLogging("app.log")
 		if err != nil {
-			return fmt.Errorf("failed to open app.log: %w", err)
+			return fmt.Errorf("app: failed to open app.log: %w", err)
 		}
 		a.logFile = f
-		Log.Info("App started with file logging", "tickRate", a.tickRate)
 	}
 
 	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
-		Log.Error("Failed to enable raw mode", "err", err)
-		return fmt.Errorf("failed to enable raw mode: %w", err)
+		Log.Error("app: failed to enable raw mode", "err", err)
+		return fmt.Errorf("app: failed to enable raw mode: %w", err)
 	}
 	a.oldTermState = oldState
 
@@ -143,7 +148,6 @@ func (a *App) cleanup() {
 	fmt.Print("\u001B[?25h\u001B[2J\u001B[H")
 
 	if a.logFile != nil {
-		Log.Info("App cleanup completed, closing log file")
 		_ = a.logFile.Close()
 		resetLogger()
 		a.logFile = nil

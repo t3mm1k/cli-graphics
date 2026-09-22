@@ -38,7 +38,12 @@ func (b *Button) SetText(newText string) {
 	width := utf8.RuneCountInString(b.text)
 	width, height := utils.GetActuallySize(true, width, 1)
 	b.SetSize(width, height)
-	b.Buffer = engine.NewBuffer(width, height)
+
+	if buf, err := engine.NewBuffer(width, height); err == nil {
+		b.Buffer = buf
+	} else {
+		panic(err)
+	}
 }
 
 func (b *Button) GetBuffer() [][]rune {

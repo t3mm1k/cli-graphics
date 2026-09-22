@@ -58,6 +58,14 @@ func (b *Box) OnTick() {
 }
 
 func (b *Box) AddChild(child engine.Component) {
+	if child == nil {
+		engine.Log.Warn("AddChild: attempt to add nil child, ignored", "err", engine.NilChildError)
+		return
+	}
+	if child.GetId() == b.GetId() {
+		panic(engine.CyclicDependencyError)
+	}
+
 	b.Children = append(b.Children, child)
 	engine.Registry.SetParent(child.GetId(), b.GetId())
 }

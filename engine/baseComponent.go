@@ -11,10 +11,14 @@ type BaseComponent struct {
 }
 
 func NewBaseComponent(id uuid.UUID, x, y, w, h int, border bool) BaseComponent {
+	buf, err := NewBuffer(w, h)
+	if err != nil {
+		panic(err)
+	}
 	return BaseComponent{
 		id: id,
 		x:  x, y: y, w: w, h: h,
-		Buffer: NewBuffer(w, h),
+		Buffer: buf,
 		Border: border,
 	}
 }
