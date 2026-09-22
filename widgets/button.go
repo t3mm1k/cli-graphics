@@ -17,13 +17,6 @@ type Button struct {
 	OnClick   func()
 }
 
-func (b *Button) Rerender() {
-	width := utf8.RuneCountInString(b.text)
-	width, height := utils.GetActuallySize(true, width, 1)
-	b.SetSize(width, height)
-	b.Buffer = engine.NewBuffer(width, height)
-}
-
 func NewButton(x, y int, text string, onClick func()) *Button {
 	id := uuid.New()
 	width := utf8.RuneCountInString(text)
@@ -42,9 +35,10 @@ func NewButton(x, y int, text string, onClick func()) *Button {
 
 func (b *Button) SetText(newText string) {
 	b.text = newText
-	b.Rerender()
-
-	engine.EventsQ <- engine.RerenderEvent{ComponentId: b.GetId()}
+	width := utf8.RuneCountInString(b.text)
+	width, height := utils.GetActuallySize(true, width, 1)
+	b.SetSize(width, height)
+	b.Buffer = engine.NewBuffer(width, height)
 }
 
 func (b *Button) GetBuffer() [][]rune {
@@ -72,6 +66,7 @@ func (b *Button) HandleKey(key string) bool {
 }
 
 func (b *Button) Render() {
+	b.Buffer.Clear()
 	b.RenderBorder(b.isFocused)
 
 	w, _ := b.GetSize()

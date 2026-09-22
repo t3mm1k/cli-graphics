@@ -4,147 +4,25 @@ import (
 	"cli-graphics/engine"
 	"cli-graphics/widgets"
 	"fmt"
-	"os"
-	"time"
-	"unicode/utf8"
-
-	"github.com/google/uuid"
-	"golang.org/x/term"
 )
 
-func ReadKey() string {
-	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		panic(err)
-	}
-
-	defer term.Restore(int(os.Stdin.Fd()), oldState)
-
-	b := make([]byte, 3)
-	n, _ := os.Stdin.Read(b)
-
-	if n == 1 {
-		switch b[0] {
-		case 3:
-			return "Ctrl+C"
-		case 13:
-			return "Enter"
-		case 27:
-			return "Escape"
-		case 127, 8:
-			return "Backspace"
-		case 9:
-			return "Tab"
-		default:
-			return string(b[0])
-		}
-	} else if n == 2 {
-		r, _ := utf8.DecodeRune(b[:n])
-		return string(r)
-
-	} else if n == 3 && b[0] == 27 && b[1] == 91 {
-		switch b[2] {
-		case 65:
-			return "Up"
-		case 66:
-			return "Down"
-		case 67:
-			return "Right"
-		case 68:
-			return "Left"
-		}
-	}
-
-	return "Unknown"
-}
 func main() {
-	ticker := time.NewTicker(500 * time.Millisecond)
-
-	go func() {
-		for {
-			key := ReadKey()
-			engine.EventsQ <- &engine.KeyEvent{Key: key}
-		}
-	}()
-
 	rootScreen := widgets.NewBox(0, 0, 80, 24)
-
 	window1 := widgets.NewBox(5, 6, 30, 10)
-	list := widgets.NewList(12, 5, 29, 1, []string{"тп на аме — Серега Пират", "Почему ты еще не фанат? — Серега Пират", "Я поднимаю свою голову вверх — Серега Пират", "ЧСВ — Lida & Серега Пират", "Зомби апокалипсис — Серега Пират", "Вайбмен — Серега Пират", "как же он силён — Серега Пират", "Ну и что, что я вор? — Серега Пират", "прости я не знаю — Серега Пират", "ну где моя нога — Серега Пират"})
-	button := widgets.NewButton(40, 20, "but", func() { fmt.Println("but") })
-	button1 := widgets.NewButton(46, 20, "but1", func() { fmt.Println("but1") })
-	buttonInBox := widgets.NewButton(1, 2, "Click me", nil)
-	buttonInBox.OnClick = func() {
-		buttonInBox.SetText("Clicked")
-	}
-	labelWithoutBorder := widgets.NewLabel(40, 15, true, "lab")
 	input := widgets.NewInput(1, 2, 18, nil)
-
+	btnExit := widgets.NewButton(40, 20, "Exit", nil)
 	rootScreen.AddChild(input)
-
-	window1.AddChild(buttonInBox)
 	rootScreen.AddChild(window1)
-	rootScreen.AddChild(list)
-	rootScreen.AddChild(button)
-	rootScreen.AddChild(button1)
-	rootScreen.AddChild(labelWithoutBorder)
+	rootScreen.AddChild(btnExit)
 	rootScreen.SetFocus(true)
-	rootScreen.Render()
 
-	rootScreen.Buffer.Flush()
+	app := engine.NewApp(rootScreen)
 
-	for {
-		needFullRender := false
+	btnExit.OnClick = func() {
+		app.Stop()
+	}
 
-		select {
-		case event := <-engine.EventsQ:
-			switch e := event.(type) {
-			case *engine.KeyEvent:
-				if e.Key == "Ctrl+C" {
-					return
-				}
-
-				if e.Key == "Tab" {
-					if !rootScreen.HandleKey("Tab") {
-						rootScreen.SetFocus(true)
-					}
-				} else {
-					rootScreen.HandleKey(e.Key)
-				}
-
-				needFullRender = true
-
-			case *engine.RerenderEvent:
-				currentId := e.ComponentId
-
-				for currentId != uuid.Nil {
-					comp, exists := engine.Registry.GetComponent(currentId)
-					if !exists {
-						break
-					}
-
-					if container, ok := comp.(engine.Container); ok {
-						container.CompositeChildren()
-					}
-
-					parentId, hasParent := engine.Registry.GetParent(currentId)
-					if !hasParent {
-						break
-					}
-
-					currentId = parentId
-				}
-			}
-
-		case <-ticker.C:
-			rootScreen.OnTick()
-			needFullRender = true
-		}
-
-		if needFullRender {
-			rootScreen.Render()
-		}
-
-		rootScreen.Buffer.Flush()
+	if err := app.Run(); err != nil {
+		fmt.Printf("Error: %v\n", err)
 	}
 }

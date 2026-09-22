@@ -13,11 +13,6 @@ type ListView struct {
 	Lines []string
 }
 
-func (l *ListView) Rerender() {
-	//TODO implement me
-	panic("implement me")
-}
-
 func NewList(w, h, x, y int, lines []string) *ListView {
 	id := uuid.New()
 	list := &ListView{

@@ -20,21 +20,16 @@ type Input struct {
 
 	OnInput func(key string)
 
-	Filter  func(key string) bool
-}
-
-func (i *Input) Rerender() {
-	//TODO implement me
-	panic("implement me")
+	Filter func(key string) bool
 }
 
 func (i *Input) SetFocus(focused bool) {
-    i.isFocused = focused
-    if focused {
-        i.cursorIsVisible = true
-    } else {
-        i.cursorIsVisible = false
-    }
+	i.isFocused = focused
+	if focused {
+		i.cursorIsVisible = true
+	} else {
+		i.cursorIsVisible = false
+	}
 }
 
 func (i *Input) GetValue() []rune {
@@ -55,7 +50,7 @@ func (i *Input) IsFocused() bool {
 func (i *Input) HandleKey(key string) bool {
 	if key == "Tab" {
 		return false
-	} 
+	}
 
 	switch key {
 	case "Enter":
@@ -64,7 +59,7 @@ func (i *Input) HandleKey(key string) bool {
 		if len(i.value) == 0 || i.cursorPos == 0 {
 			return true
 		}
-		
+
 		i.value = append(i.value[:i.cursorPos-1], i.value[i.cursorPos:]...)
 		i.cursorPos--
 
@@ -103,7 +98,7 @@ func (i *Input) HandleKey(key string) bool {
 		i.cursorPos++
 
 		if i.OnInput != nil {
-		i.OnInput(inputChar)
+			i.OnInput(inputChar)
 		}
 	}
 
@@ -153,7 +148,7 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 		OnInput:         onInput,
 		cursorIsVisible: false,
 		cursorPos:       0,
-		Filter:          func(key string) bool {
+		Filter: func(key string) bool {
 			runes := []rune(key)
 			if len(runes) != 1 {
 				return false

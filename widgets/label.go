@@ -14,11 +14,6 @@ type Label struct {
 	engine.BaseComponent
 }
 
-func (l *Label) Rerender() {
-	//TODO implement me
-	panic("implement me")
-}
-
 func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 	var width int
 
@@ -41,7 +36,7 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 }
 
 func (l *Label) Render() {
-
+	l.Buffer.Clear()
 	l.RenderBorder(false)
 
 	w, _ := l.GetSize()

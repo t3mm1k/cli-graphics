@@ -14,9 +14,10 @@ type Box struct {
 	focused      bool
 }
 
-func (b *Box) Rerender() {
-	//TODO implement me
-	panic("implement me")
+func (b *Box) Flush() {
+	if b.Buffer != nil {
+		b.Buffer.Flush()
+	}
 }
 
 func (b *Box) IsFocused() bool {
@@ -41,24 +42,13 @@ func (b *Box) GetBuffer() [][]rune {
 func (b *Box) Render() {
 	b.Buffer.Clear()
 
-	//w, h := b.GetSize()
-
-	b.RenderBorder(false)
+	b.RenderBorder(b.focused)
 
 	for _, child := range b.Children {
 		child.Render()
 		x, y := child.GetCoords()
 		b.Buffer.Blit(child.GetBuffer(), x, y)
 	}
-}
-
-func (b *Box) CompositeChildren() {
-    for _, child := range b.Children {
-        x, y := child.GetCoords()
-        w, h := child.GetSize()
-        b.Buffer.ClearRegion(x, y, w, h)
-        b.Buffer.Blit(child.GetBuffer(), x, y)
-    }
 }
 
 func (b *Box) OnTick() {
