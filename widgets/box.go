@@ -8,7 +8,7 @@ import (
 
 type Box struct {
 	engine.BaseComponent
-	Children []engine.Component
+	children []engine.Component
 
 	focusedIndex int
 	focused      bool
@@ -44,7 +44,7 @@ func (b *Box) Render() {
 
 	b.RenderBorder(b.focused)
 
-	for _, child := range b.Children {
+	for _, child := range b.children {
 		child.Render()
 		x, y := child.GetCoords()
 		b.Buffer.Blit(child.GetBuffer(), x, y)
@@ -52,7 +52,7 @@ func (b *Box) Render() {
 }
 
 func (b *Box) OnTick() {
-	for _, child := range b.Children {
+	for _, child := range b.children {
 		child.OnTick()
 	}
 }
@@ -66,13 +66,13 @@ func (b *Box) AddChild(child engine.Component) {
 		panic(engine.CyclicDependencyError)
 	}
 
-	b.Children = append(b.Children, child)
+	b.children = append(b.children, child)
 	engine.Registry.SetParent(child.GetId(), b.GetId())
 }
 
-func (b *Box) FindNextFocusableChild(st int) int {
-	for i := st; i < len(b.Children); i++ {
-		if _, ok := b.Children[i].(engine.Focusable); ok {
+func (b *Box) findNextFocusableChild(st int) int {
+	for i := st; i < len(b.children); i++ {
+		if _, ok := b.children[i].(engine.Focusable); ok {
 			return i
 		}
 	}
@@ -83,16 +83,16 @@ func (b *Box) SetFocus(focused bool) {
 	b.focused = focused
 
 	if focused {
-		b.focusedIndex = b.FindNextFocusableChild(0)
+		b.focusedIndex = b.findNextFocusableChild(0)
 
 		if b.focusedIndex != -1 {
-			if focusable, ok := b.Children[b.focusedIndex].(engine.Focusable); ok {
+			if focusable, ok := b.children[b.focusedIndex].(engine.Focusable); ok {
 				focusable.SetFocus(true)
 			}
 		}
 	} else {
 		if b.focusedIndex != -1 {
-			if focusable, ok := b.Children[b.focusedIndex].(engine.Focusable); ok {
+			if focusable, ok := b.children[b.focusedIndex].(engine.Focusable); ok {
 				focusable.SetFocus(false)
 			}
 		}
@@ -103,11 +103,11 @@ func (b *Box) SetFocus(focused bool) {
 
 func (b *Box) HandleKey(key string) bool {
 
-	if len(b.Children) == 0 || b.focusedIndex == -1 {
+	if len(b.children) == 0 || b.focusedIndex == -1 {
 		return false
 	}
 
-	child := b.Children[b.focusedIndex]
+	child := b.children[b.focusedIndex]
 	activeChild, isFocusable := child.(engine.Focusable)
 
 	if isFocusable && activeChild.HandleKey(key) {
@@ -115,13 +115,13 @@ func (b *Box) HandleKey(key string) bool {
 	}
 
 	if key == "Tab" {
-		nextIndex := b.FindNextFocusableChild(b.focusedIndex + 1)
+		nextIndex := b.findNextFocusableChild(b.focusedIndex + 1)
 		if nextIndex != -1 {
 			if isFocusable {
 				activeChild.SetFocus(false)
 			}
 			b.focusedIndex = nextIndex
-			if focusable, ok := b.Children[nextIndex].(engine.Focusable); ok {
+			if focusable, ok := b.children[nextIndex].(engine.Focusable); ok {
 				focusable.SetFocus(true)
 			}
 			return true

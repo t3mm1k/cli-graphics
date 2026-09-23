@@ -10,14 +10,14 @@ import (
 type ListView struct {
 	engine.BaseComponent
 
-	Lines []string
+	lines []string
 }
 
 func NewList(w, h, x, y int, lines []string) *ListView {
 	id := uuid.New()
 	list := &ListView{
 		BaseComponent: engine.NewBaseComponent(id, x, y, w, h, true),
-		Lines:         lines,
+		lines:         lines,
 	}
 
 	engine.Registry.AddComponent(list)
@@ -35,7 +35,7 @@ func (l *ListView) Render() {
 
 	w, h := l.GetSize()
 
-	for i, line := range l.Lines {
+	for i, line := range l.lines {
 		if i >= h-2 {
 			break
 		}
@@ -48,13 +48,13 @@ func (l *ListView) Render() {
 		}
 
 		copy(l.Buffer.Data[i+1][1:], source)
-		//l.Print()
+		//l.print()
 	}
 }
 
 func (l *ListView) OnTick() {}
 
-func (l *ListView) Print() {
+func (l *ListView) print() {
 	buf := l.Buffer.GetObjects()
 	for _, row := range buf {
 		fmt.Println(string(row))
