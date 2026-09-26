@@ -27,7 +27,10 @@ type App struct {
 }
 
 func NewApp(root Component) *App {
-	buf := NewBuffer(80, 24) //TODO динамический размер(
+	buf, err := NewBuffer(80, 24) //TODO динамический размер(
+	if err != nil {
+		panic(err)
+	}
 	return &App{
 		buffer:   buf,
 		root:     root,
