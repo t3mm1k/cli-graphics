@@ -11,6 +11,7 @@ import (
 )
 
 type App struct {
+	buffer   *Buffer
 	root     Component
 	events   chan Event
 	tickRate time.Duration
@@ -23,7 +24,9 @@ type App struct {
 }
 
 func NewApp(root Component) *App {
+	buf := NewBuffer(80, 24) //TODO динамический размер(
 	return &App{
+		buffer:   buf,
 		root:     root,
 		events:   make(chan Event, 100),
 		tickRate: 500 * time.Millisecond,
@@ -125,13 +128,11 @@ func (a *App) cleanup() {
 }
 
 func (a *App) draw() {
-	if a.root == nil {
+	if a.root == nil || a.buffer == nil {
 		return
 	}
-	a.root.Render()
-	if base, ok := a.root.(interface{ Flush() }); ok {
-		base.Flush()
-	} else if bc, ok := a.root.(Container); ok {
-		bc.Flush()
-	}
+	a.buffer.Clear()
+	canvas := NewCanvas(a.buffer)
+	a.root.Render(canvas)
+	a.buffer.Flush()
 }

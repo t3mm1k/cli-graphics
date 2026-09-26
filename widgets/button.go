@@ -22,7 +22,7 @@ func NewButton(x, y int, text string, onClick func()) *Button {
 	width := utf8.RuneCountInString(text)
 	width, height := utils.GetActuallySize(true, width, 1)
 	btn := &Button{
-		BaseComponent: engine.NewBaseComponent(id, x, y, width, height, true),
+		BaseComponent: engine.NewBaseComponent(id, x, y, width, height),
 		text:          text,
 		isFocused:     false,
 		OnClick:       onClick,
@@ -38,11 +38,6 @@ func (b *Button) SetText(newText string) {
 	width := utf8.RuneCountInString(b.text)
 	width, height := utils.GetActuallySize(true, width, 1)
 	b.SetSize(width, height)
-	b.Buffer = engine.NewBuffer(width, height)
-}
-
-func (b *Button) GetBuffer() [][]rune {
-	return b.Buffer.GetObjects()
 }
 
 func (b *Button) SetFocus(focused bool) {
@@ -65,19 +60,15 @@ func (b *Button) HandleKey(key string) bool {
 	return false
 }
 
-func (b *Button) Render() {
-	b.Buffer.Clear()
-	b.RenderBorder(b.isFocused)
+func (b *Button) Render(canvas *engine.Canvas) {
+	w, h := b.GetSize()
 
-	w, _ := b.GetSize()
-
-	textW := w - 2
-	textH := 1
-
-	for i, let := range b.text {
-		if i >= textW {
-			break
-		}
-		b.Buffer.Data[textH][i+1] = let
+	borderStyle := engine.BorderSingle
+	if b.isFocused {
+		borderStyle = engine.BorderDouble
 	}
+
+	canvas.DrawRect(0, 0, w, h, borderStyle)
+
+	canvas.DrawString(1, 1, b.text)
 }

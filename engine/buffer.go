@@ -49,11 +49,11 @@ func (b *Buffer) Clear() {
 }
 
 func (b *Buffer) ClearRegion(x, y, w, h int) {
-    for row := y; row < y+h && row < b.H; row++ {
-        for col := x; col < x+w && col < b.W; col++ {
-            b.Data[row][col] = ' '
-        }
-    }
+	for row := y; row < y+h && row < b.H; row++ {
+		for col := x; col < x+w && col < b.W; col++ {
+			b.Data[row][col] = ' '
+		}
+	}
 }
 
 func (b *Buffer) Blit(child [][]rune, x, y int) {

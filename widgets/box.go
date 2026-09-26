@@ -14,12 +14,6 @@ type Box struct {
 	focused      bool
 }
 
-func (b *Box) Flush() {
-	if b.Buffer != nil {
-		b.Buffer.Flush()
-	}
-}
-
 func (b *Box) IsFocused() bool {
 	return b.focused
 }
@@ -28,26 +22,24 @@ func NewBox(x, y, w, h int) *Box {
 	id := uuid.New()
 
 	box := &Box{
-		BaseComponent: engine.NewBaseComponent(id, x, y, w, h, true),
+		BaseComponent: engine.NewBaseComponent(id, x, y, w, h),
 	}
 
 	engine.Registry.AddComponent(box)
 	return box
 }
 
-func (b *Box) GetBuffer() [][]rune {
-	return b.Buffer.GetObjects()
-}
-
-func (b *Box) Render() {
-	b.Buffer.Clear()
-
-	b.RenderBorder(b.focused)
+func (b *Box) Render(canvas *engine.Canvas) {
+	w, h := b.GetSize()
+	canvas.DrawRect(0, 0, w, h, engine.BorderSingle)
 
 	for _, child := range b.Children {
-		child.Render()
 		x, y := child.GetCoords()
-		b.Buffer.Blit(child.GetBuffer(), x, y)
+		w, h := child.GetSize()
+
+		childCanvas := canvas.SubCanvas(x, y, w, h)
+
+		child.Render(childCanvas)
 	}
 }
 
