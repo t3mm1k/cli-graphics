@@ -9,8 +9,8 @@ import (
 )
 
 type Label struct {
-	text string
-
+	text   string
+	border bool
 	engine.BaseComponent
 }
 
@@ -26,8 +26,9 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 
 	id := uuid.New()
 	lbl := &Label{
-		BaseComponent: engine.NewBaseComponent(id, x, y, width, height, border),
+		BaseComponent: engine.NewBaseComponent(id, x, y, width, height),
 		text:          text,
+		border:        border,
 	}
 
 	engine.Registry.AddComponent(lbl)
@@ -35,35 +36,14 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 	return lbl
 }
 
-func (l *Label) Render() {
-	l.Buffer.Clear()
-	l.RenderBorder(false)
-
-	w, _ := l.GetSize()
-
-	var textW, textH int = w, 0
-
-	if l.Border {
-		textH = 1
-		textW -= 2
-	}
-
-	text := []rune(l.text)
-
-	for i, let := range text {
-		pos := i
-		if l.Border {
-			pos += 1
-		}
-		if i >= textW {
-			break
-		}
-		l.Buffer.Data[textH][pos] = let
+func (l *Label) Render(canvas *engine.Canvas) {
+	if l.border {
+		w, h := l.GetSize()
+		canvas.DrawRect(0, 0, w, h, engine.BorderSingle)
+		canvas.DrawString(1, 1, l.text)
+	} else {
+		canvas.DrawString(0, 0, l.text)
 	}
 }
 
 func (l *Label) OnTick() {}
-
-func (l *Label) GetBuffer() [][]rune {
-	return l.Buffer.GetObjects()
-}

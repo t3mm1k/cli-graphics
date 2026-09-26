@@ -3,9 +3,7 @@ package engine
 import "github.com/google/uuid"
 
 type Component interface {
-	Render()
-
-	GetBuffer() [][]rune
+	Render(canvas *Canvas)
 
 	GetCoords() (x, y int)
 
