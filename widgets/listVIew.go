@@ -9,7 +9,7 @@ import (
 type ListView struct {
 	engine.BaseComponent
 
-	Lines []string
+	lines []string
 }
 
 func NewList(w, h, x, y int, lines []string) *ListView {
@@ -28,7 +28,7 @@ func (l *ListView) Render(canvas *engine.Canvas) {
 
 	_, h := l.GetSize()
 
-	for i, line := range l.Lines {
+	for i, line := range l.lines {
 		if i >= h-2 {
 			break
 		}
