@@ -111,14 +111,23 @@ func (i *Input) OnTick() {
 	}
 }
 
-func (i *Input) Render() {
-	i.Buffer.Clear()
-	i.RenderBorder(i.IsFocused())
+func (i *Input) Render(canvas *engine.Canvas) {
+	w, h := i.GetSize()
 
-	w, _ := i.GetSize()
+	borderStyle := engine.BorderSingle
+	if i.isFocused {
+		borderStyle = engine.BorderDouble
+	}
+
+	canvas.DrawRect(0, 0, w, h, borderStyle)
+
 	textW := w - 2
 	if textW <= 0 {
 		return
+	}
+
+	for col := 0; col < textW; col++ {
+		canvas.SetCell(1+col, 1, ' ')
 	}
 
 	start := 0
@@ -129,14 +138,14 @@ func (i *Input) Render() {
 	for j := 0; j < textW; j++ {
 		strIndex := start + j
 		if strIndex < len(i.value) {
-			i.Buffer.Data[1][j+1] = i.value[strIndex]
+			canvas.SetCell(1+j, 1, i.value[strIndex])
 		}
 	}
 
 	if i.isFocused && i.cursorIsVisible {
 		visualCursorPos := i.cursorPos - start
 		if visualCursorPos >= 0 && visualCursorPos < textW {
-			i.Buffer.Data[1][visualCursorPos+1] = '_'
+			canvas.SetCell(1+visualCursorPos, 1, '_')
 		}
 	}
 }
@@ -144,7 +153,7 @@ func (i *Input) Render() {
 func NewInput(x, y, w int, onInput func(key string)) *Input {
 	id := uuid.New()
 	input := &Input{
-		BaseComponent:   engine.NewBaseComponent(id, x, y, w, 3, true),
+		BaseComponent:   engine.NewBaseComponent(id, x, y, w, 3),
 		OnInput:         onInput,
 		cursorIsVisible: false,
 		cursorPos:       0,
