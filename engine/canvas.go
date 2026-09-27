@@ -34,7 +34,7 @@ func (c *Canvas) SubCanvas(x, y, w, h int) *Canvas {
 	}
 }
 
-func (c *Canvas) SetCell(x, y int, r rune) {
+func (c *Canvas) SetCell(x, y int, cell Cell) {
 	if (y < 0) || (x < 0) || (x >= c.clipW) || (y >= c.clipH) {
 		return
 	}
@@ -46,18 +46,22 @@ func (c *Canvas) SetCell(x, y int, r rune) {
 		return
 	}
 
-	c.buffer.Data[globalY][globalX] = r
+	c.buffer.Data[globalY][globalX] = cell
+}
+
+func (c *Canvas) SetRune(x, y int, rune rune) {
+	c.SetCell(x, y, NewCell(rune))
 }
 
 func (c *Canvas) DrawString(x, y int, s string) {
 	r := []rune(s)
 
 	for i, cell := range r {
-		c.SetCell(x+i, y, cell)
+		c.SetCell(x, y+i, NewCellColored(cell, ColorNeonCyan, ColorLightGray)) //TODO Сделать СТИЛИ ДЛЯ СТРОК!!!
 	}
 }
 
-func (c *Canvas) DrawRect(x, y, w, h int, borderStyle ...BorderStyle) {
+func (c *Canvas) DrawRect(x, y, w, h int, borderStyle ...BorderStyle) { //TODO добавить стили так же
 	if w < 2 || h < 2 {
 		return
 	}
@@ -66,19 +70,19 @@ func (c *Canvas) DrawRect(x, y, w, h int, borderStyle ...BorderStyle) {
 	if len(borderStyle) > 0 {
 		style = borderStyle[0]
 	}
-	var hLine, vLine rune
-	var tl, tr, bl, br rune
+	var hLine, vLine Cell
+	var tl, tr, bl, br Cell
 
 	switch style {
 	case BorderDouble:
-		hLine, vLine = '═', '║'
-		tl, tr, bl, br = '╔', '╗', '╚', '╝'
+		hLine, vLine = NewCell('═'), NewCell('║')
+		tl, tr, bl, br = NewCell('╔'), NewCell('╗'), NewCell('╚'), NewCell('╝')
 	case BorderRounded:
-		hLine, vLine = '─', '│'
-		tl, tr, bl, br = '╭', '╮', '╰', '╯'
+		hLine, vLine = NewCell('─'), NewCell('│')
+		tl, tr, bl, br = NewCell('╭'), NewCell('╮'), NewCell('╰'), NewCell('╯')
 	default:
-		hLine, vLine = '─', '│'
-		tl, tr, bl, br = '┌', '┐', '└', '┘'
+		hLine, vLine = NewCell('─'), NewCell('│')
+		tl, tr, bl, br = NewCell('┌'), NewCell('┐'), NewCell('└'), NewCell('┘')
 	}
 
 	for col := x + 1; col < x+w-1; col++ {
