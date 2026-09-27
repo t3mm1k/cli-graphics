@@ -93,7 +93,7 @@ func (i *Input) HandleKey(key string) bool {
 }
 
 func (i *Input) OnTick() {
-	if i.isFocused {
+	if i.IsFocused() {
 		i.cursorIsVisible = !i.cursorIsVisible
 	}
 }
@@ -102,7 +102,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 	w, h := i.GetSize()
 
 	borderStyle := engine.BorderSingle
-	if i.isFocused {
+	if i.IsFocused() {
 		borderStyle = engine.BorderDouble
 	}
 
@@ -129,7 +129,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 		}
 	}
 
-	if i.isFocused && i.cursorIsVisible {
+	if i.IsFocused() && i.cursorIsVisible {
 		visualCursorPos := i.cursorPos - start
 		if visualCursorPos >= 0 && visualCursorPos < textW {
 			canvas.SetCell(1+visualCursorPos, 1, '_')
