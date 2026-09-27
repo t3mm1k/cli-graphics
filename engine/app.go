@@ -29,7 +29,7 @@ type App struct {
 }
 
 func NewApp(root Component) *App {
-	buf, err := NewBuffer(80, 24) //TODO динамический размер(
+	buf, err := NewBuffer(80, 24)
 	if err != nil {
 		panic(err)
 	}
@@ -83,14 +83,20 @@ func (a *App) Run() error {
 		}
 	}()
 
-	fmt.Print("\u001B[?25l")
+	fmt.Print("\u001B[?1049h\u001B[?25l\u001B[?7l")
 
 	go a.listenKeys()
+	go a.listenResize()
 
 	ticker := time.NewTicker(a.tickRate)
 	defer ticker.Stop()
 
 	a.running = true
+
+	if w, h, err := term.GetSize(int(os.Stdout.Fd())); err == nil && w > 0 && h > 0 {
+		a.buffer.SetSize(w, h)
+		a.root.SetSize(w, h)
+	}
 	a.draw()
 
 	for {
@@ -105,6 +111,11 @@ func (a *App) Run() error {
 					return nil
 				}
 				a.handleKey(e.Key)
+				a.draw()
+
+			case *TerminalResizeEvent:
+				a.buffer.SetSize(e.Width, e.Height)
+				a.root.SetSize(e.Width, e.Height)
 				a.draw()
 			}
 
@@ -125,6 +136,33 @@ func (app *App) Stop() {
 		close(app.stopChan)
 	})
 }
+
+func (a *App) listenResize() {
+	ticker := time.NewTicker(150 * time.Millisecond)
+	defer ticker.Stop()
+	lastW, lastH := a.buffer.GetSize()
+	for {
+		select {
+		case <-a.stopChan:
+			return
+		case <-ticker.C:
+			w, h, err := term.GetSize(int(os.Stdout.Fd()))
+			//h -= 1
+			if err != nil || w <= 0 || h <= 0 {
+				continue
+			}
+			if w != lastW || h != lastH {
+				lastW, lastH = w, h
+				select {
+				case <-a.stopChan:
+					return
+				case a.events <- &TerminalResizeEvent{Width: w, Height: h}:
+				}
+			}
+		}
+	}
+}
+
 func (a *App) listenKeys() {
 	buffer := make([]byte, 16)
 
@@ -165,7 +203,7 @@ func (a *App) cleanup() {
 		_ = term.Restore(int(os.Stdin.Fd()), a.oldTermState)
 	}
 
-	fmt.Print("\u001B[?25h\u001B[2J\u001B[H")
+	fmt.Print("\u001B[?7h\u001B[?25h\u001B[?1049l")
 
 	if a.logFile != nil {
 		_ = a.logFile.Close()
