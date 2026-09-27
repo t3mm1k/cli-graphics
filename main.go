@@ -14,7 +14,7 @@ func main() {
 	rootScreen.AddChild(input)
 	rootScreen.AddChild(window1)
 	rootScreen.AddChild(btnExit)
-	rootScreen.SetFocus(true)
+	engine.FocusManagerInstance.FocusNext()
 
 	app := engine.NewApp(rootScreen)
 	app.SetLogging(true)

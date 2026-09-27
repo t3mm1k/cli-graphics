@@ -181,13 +181,7 @@ func (a *App) handleKey(key string) {
 		return
 	}
 	if focusable, ok := a.root.(Focusable); ok {
-		if key == "Tab" {
-			if !focusable.HandleKey("Tab") {
-				focusable.SetFocus(true)
-			}
-		} else {
-			focusable.HandleKey(key)
-		}
+		focusable.HandleKey(key)
 	}
 }
 
