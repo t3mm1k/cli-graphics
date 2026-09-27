@@ -187,14 +187,18 @@ func (a *App) handleKey(key string) {
 	if a.root == nil {
 		return
 	}
+
+	if key == "Tab" {
+		FocusManagerInstance.FocusNext()
+		return
+	}
+	if key == "Shift+Tab" {
+		FocusManagerInstance.FocusPrev()
+		return
+	}
+
 	if focusable, ok := a.root.(Focusable); ok {
-		if key == "Tab" {
-			if !focusable.HandleKey("Tab") {
-				focusable.SetFocus(true)
-			}
-		} else {
-			focusable.HandleKey(key)
-		}
+		focusable.HandleKey(key)
 	}
 }
 
