@@ -20,24 +20,6 @@ func (fm *FocusManager) Register(id uuid.UUID) {
 	fm.order = append(fm.order, id)
 }
 
-func (fm *FocusManager) SetFocused(id uuid.UUID) {
-	fm.mu.Lock()
-	defer fm.mu.Unlock()
-
-	// снимаем фокус с текущего
-	fm.blurCurrent()
-
-	// ищем новый элемент в списке
-	for i, compId := range fm.order {
-		if compId == id {
-			fm.current = i
-			fm.focusCurrent()
-			return
-		}
-	}
-}
-
-// GetFocused — возвращает id текущего элемента в фокусе
 func (fm *FocusManager) GetFocused() uuid.UUID {
 	fm.mu.RLock()
 	defer fm.mu.RUnlock()
@@ -46,4 +28,18 @@ func (fm *FocusManager) GetFocused() uuid.UUID {
 		return uuid.Nil
 	}
 	return fm.order[fm.current]
+}
+
+func (fm *FocusManager) blurCurrent() {
+	if fm.current == -1 || fm.current >= len(fm.order) {
+		return
+	}
+	id := fm.order[fm.current]
+	comp, exists := Registry.GetComponent(id)
+	if !exists {
+		return
+	}
+	if focusable, ok := comp.(Focusable); ok {
+		focusable.SetFocus(false)
+	}
 }
