@@ -33,7 +33,7 @@ func (b *Box) Render(canvas *engine.Canvas) {
 	w, h := b.GetSize()
 	canvas.DrawRect(0, 0, w, h, engine.BorderSingle)
 
-	for _, child := range b.Children {
+	for _, child := range b.children {
 		x, y := child.GetCoords()
 		w, h := child.GetSize()
 

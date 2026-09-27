@@ -16,7 +16,7 @@ func NewList(w, h, x, y int, lines []string) *ListView {
 	id := uuid.New()
 	list := &ListView{
 		BaseComponent: engine.NewBaseComponent(id, x, y, w, h),
-		Lines:         lines,
+		lines:         lines,
 	}
 
 	engine.Registry.AddComponent(list)

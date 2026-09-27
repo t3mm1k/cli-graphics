@@ -20,7 +20,17 @@ func (b *BaseComponent) GetSize() (w, h int) {
 }
 
 func (b *BaseComponent) SetSize(w, h int) {
+	if w < 0 {
+		w = 0
+	}
+	if h < 0 {
+		h = 0
+	}
 	b.w, b.h = w, h
+}
+
+func (b *BaseComponent) SetCoords(x, y int) {
+	b.x, b.y = x, y
 }
 
 func (b *BaseComponent) GetId() uuid.UUID {

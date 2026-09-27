@@ -10,12 +10,27 @@ type Buffer struct {
 	W, H int
 }
 
-func (b *Buffer) GetWidth() int {
-	return b.W
+func (b *Buffer) GetSize() (int, int) {
+	return b.W, b.H
 }
 
-func (b *Buffer) GetHeight() int {
-	return b.H
+func (b *Buffer) SetSize(w, h int) {
+	if w <= 0 || h <= 0 {
+		panic(&InvalidBufferSizeError{W: w, H: h})
+	}
+	if b.W == w && b.H == h {
+		return
+	}
+	newData := make([][]rune, h)
+	for i := range h {
+		newData[i] = make([]rune, w)
+		for j := range w {
+			newData[i][j] = ' '
+		}
+	}
+	b.W = w
+	b.H = h
+	b.Data = newData
 }
 
 func (b *Buffer) GetObjects() [][]rune {
@@ -107,12 +122,12 @@ func (b *Buffer) Blit(child [][]rune, x, y int) error {
 
 func (b *Buffer) Flush() {
 	var builder strings.Builder
-	builder.WriteString("\u001B[H\u001B[2J\u001B[3J")
-
-	for _, row := range b.Data {
+	builder.WriteString("\u001B[H")
+	for i, row := range b.Data {
 		builder.WriteString(string(row))
-		builder.WriteString("\n")
+		if i < len(b.Data)-1 {
+			builder.WriteString("\n")
+		}
 	}
-
 	fmt.Print(builder.String())
 }
