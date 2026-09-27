@@ -29,8 +29,8 @@ func (c *Canvas) SubCanvas(x, y, w, h int) *Canvas {
 		buffer:  c.buffer,
 		offsetX: c.offsetX + x,
 		offsetY: c.offsetY + y,
-		clipW:   min(w, c.clipW),
-		clipH:   min(h, c.clipH),
+		clipW:   min(w, c.clipW-x),
+		clipH:   min(h, c.clipH-y),
 	}
 }
 
