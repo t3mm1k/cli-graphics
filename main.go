@@ -17,6 +17,7 @@ func main() {
 	rootScreen.SetFocus(true)
 
 	app := engine.NewApp(rootScreen)
+	app.SetLogging(true)
 
 	btnExit.OnClick = func() {
 		app.Stop()
