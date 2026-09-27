@@ -63,14 +63,6 @@ func (b *Box) SetFocus(focused bool) {
 }
 
 func (b *Box) HandleKey(key string) bool {
-	if key == "Tab" {
-		engine.FocusManagerInstance.FocusNext()
-		return true
-	}
-	if key == "Shift+Tab" {
-		engine.FocusManagerInstance.FocusPrev()
-		return true
-	}
 
 	focusedId := engine.FocusManagerInstance.GetFocused()
 	if focusedId == uuid.Nil {
