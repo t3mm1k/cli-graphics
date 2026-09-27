@@ -9,6 +9,8 @@ type Component interface {
 
 	GetSize() (w, h int)
 
+	SetSize(w, h int)
+
 	GetId() uuid.UUID
 
 	OnTick()
