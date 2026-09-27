@@ -27,7 +27,7 @@ func NewCell(r rune) Cell {
 	}
 }
 
-func NewCellColored(fg, bg Color, r rune) Cell {
+func NewCellColored(r rune, fg, bg Color) Cell {
 	return Cell{
 		R:       r,
 		FgColor: fg,
