@@ -20,6 +20,22 @@ func (fm *FocusManager) Register(id uuid.UUID) {
 	fm.order = append(fm.order, id)
 }
 
+func (fm *FocusManager) SetFocused(id uuid.UUID) {
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
+
+	fm.blurCurrent()
+
+	// ищем новый элемент в списке
+	for i, compId := range fm.order {
+		if compId == id {
+			fm.current = i
+			fm.focusCurrent()
+			return
+		}
+	}
+}
+
 func (fm *FocusManager) focusCurrent() {
 	if fm.current == -1 || fm.current >= len(fm.order) {
 		return
