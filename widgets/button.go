@@ -11,10 +11,8 @@ import (
 type Button struct {
 	engine.BaseComponent
 
-	text string
-
-	isFocused bool
-	OnClick   func()
+	text    string
+	OnClick func()
 }
 
 func NewButton(x, y int, text string, onClick func()) *Button {
@@ -24,12 +22,11 @@ func NewButton(x, y int, text string, onClick func()) *Button {
 	btn := &Button{
 		BaseComponent: engine.NewBaseComponent(id, x, y, width, height),
 		text:          text,
-		isFocused:     false,
 		OnClick:       onClick,
 	}
 
 	engine.Registry.AddComponent(btn)
-		engine.FocusManagerInstance.Register(id)
+	engine.FocusManagerInstance.Register(id)
 
 	return btn
 }
@@ -42,14 +39,14 @@ func (b *Button) SetText(newText string) {
 }
 
 func (b *Button) SetFocus(focused bool) {
-	b.isFocused = focused
+	// FocusManager сам отслеживает фокус
+}
+
+func (b *Button) IsFocused() bool {
+	return engine.FocusManagerInstance.GetFocused() == b.GetId()
 }
 
 func (b *Button) OnTick() {}
-
-func (b *Button) IsFocused() bool {
-	return b.isFocused
-}
 
 func (b *Button) HandleKey(key string) bool {
 	if key == "Enter" || key == " " {
@@ -65,11 +62,10 @@ func (b *Button) Render(canvas *engine.Canvas) {
 	w, h := b.GetSize()
 
 	borderStyle := engine.BorderSingle
-	if b.isFocused {
+	if b.IsFocused() {
 		borderStyle = engine.BorderDouble
 	}
 
 	canvas.DrawRect(0, 0, w, h, borderStyle)
-
 	canvas.DrawString(1, 1, b.text)
 }
