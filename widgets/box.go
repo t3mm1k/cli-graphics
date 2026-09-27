@@ -60,10 +60,6 @@ func (b *Box) AddChild(child engine.Component) {
 
 func (b *Box) SetFocus(focused bool) {
 	b.focused = focused
-
-	if focused {
-		engine.FocusManagerInstance.FocusNext()
-	}
 }
 
 func (b *Box) HandleKey(key string) bool {
@@ -91,8 +87,4 @@ func (b *Box) HandleKey(key string) bool {
 	}
 
 	return false
-}
-
-func (b *Box) FindNextFocusableChild(st int) int {
-	return -1
 }
