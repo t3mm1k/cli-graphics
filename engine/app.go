@@ -4,6 +4,7 @@ import (
 	"cli-graphics/utils"
 	"fmt"
 	"os"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -74,7 +75,13 @@ func (a *App) Run() error {
 	}
 	a.oldTermState = oldState
 
-	defer a.cleanup()
+	defer func() {
+		if r := recover(); r != nil {
+			Log.Error("Application panicked", "error", r, "stack", string(debug.Stack()))
+			a.cleanup()
+			panic(r)
+		}
+	}()
 
 	fmt.Print("\u001B[?25l")
 
