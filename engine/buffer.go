@@ -10,12 +10,17 @@ type Buffer struct {
 	W, H int
 }
 
-func (b *Buffer) GetWidth() int {
-	return b.W
+func (b *Buffer) GetSize() (int, int) {
+	return b.W, b.H
 }
 
-func (b *Buffer) GetHeight() int {
-	return b.H
+func (b *Buffer) SetSize(w, h int) {
+	if w < 0 || h < 0 {
+		panic(&InvalidBufferSizeError{W: w, H: h})
+	}
+
+	b.W = w
+	b.H = h
 }
 
 func (b *Buffer) GetObjects() [][]rune {
