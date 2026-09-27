@@ -76,9 +76,9 @@ func (a *App) Run() error {
 	a.oldTermState = oldState
 
 	defer func() {
+		a.cleanup()
 		if r := recover(); r != nil {
 			Log.Error("Application panicked", "error", r, "stack", string(debug.Stack()))
-			a.cleanup()
 			panic(r)
 		}
 	}()
