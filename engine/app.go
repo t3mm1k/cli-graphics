@@ -14,6 +14,7 @@ type App struct {
 	buffer   *Buffer
 	root     Component
 	events   chan Event
+	actions  chan func()
 	tickRate time.Duration
 
 	running  bool
@@ -37,6 +38,7 @@ func NewApp(root Component) *App {
 		events:   make(chan Event, 100),
 		tickRate: 500 * time.Millisecond,
 		stopChan: make(chan struct{}),
+		actions:  make(chan func(), 100),
 	}
 }
 
@@ -98,6 +100,10 @@ func (a *App) Run() error {
 				a.handleKey(e.Key)
 				a.draw()
 			}
+
+		case action := <-a.actions:
+			action()
+			a.draw()
 
 		case <-ticker.C:
 			if a.root != nil {
@@ -169,4 +175,12 @@ func (a *App) draw() {
 	canvas := NewCanvas(a.buffer)
 	a.root.Render(canvas)
 	a.buffer.Flush()
+}
+
+func (a *App) Post(action func()) {
+	select {
+	case <-a.stopChan:
+		return
+	case a.actions <- action:
+	}
 }
