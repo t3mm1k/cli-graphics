@@ -168,6 +168,7 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 	}
 
 	engine.Registry.AddComponent(input)
-
+	engine.FocusManagerInstance.Register(id)
+	
 	return input
 }

@@ -8,8 +8,8 @@ import (
 
 type FocusManager struct {
 	mu      sync.RWMutex
-	order   []uuid.UUID // порядок обхода по Tab
-	current int         // индекс текущего элемента в order
+	order   []uuid.UUID
+	current int
 }
 
 var FocusManagerInstance = &FocusManager{current: -1}
@@ -26,7 +26,6 @@ func (fm *FocusManager) SetFocused(id uuid.UUID) {
 
 	fm.blurCurrent()
 
-	// ищем новый элемент в списке
 	for i, compId := range fm.order {
 		if compId == id {
 			fm.current = i
@@ -35,7 +34,6 @@ func (fm *FocusManager) SetFocused(id uuid.UUID) {
 		}
 	}
 }
-
 
 func (fm *FocusManager) GetFocused() uuid.UUID {
 	fm.mu.RLock()

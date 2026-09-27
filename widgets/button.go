@@ -29,6 +29,7 @@ func NewButton(x, y int, text string, onClick func()) *Button {
 	}
 
 	engine.Registry.AddComponent(btn)
+		engine.FocusManagerInstance.Register(id)
 
 	return btn
 }
