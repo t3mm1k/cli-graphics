@@ -57,7 +57,7 @@ func (c *Canvas) DrawString(x, y int, s string) {
 	r := []rune(s)
 
 	for i, cell := range r {
-		c.SetCell(x, y+i, NewCellColored(cell, ColorNeonCyan, ColorLightGray)) //TODO Сделать СТИЛИ ДЛЯ СТРОК!!!
+		c.SetCell(x+i, y, NewCellColored(cell, ColorNeonCyan, ColorDefault())) //TODO Сделать СТИЛИ ДЛЯ СТРОК!!!
 	}
 }
 
