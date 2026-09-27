@@ -15,12 +15,22 @@ func (b *Buffer) GetSize() (int, int) {
 }
 
 func (b *Buffer) SetSize(w, h int) {
-	if w < 0 || h < 0 {
+	if w <= 0 || h <= 0 {
 		panic(&InvalidBufferSizeError{W: w, H: h})
 	}
-
+	if b.W == w && b.H == h {
+		return
+	}
+	newData := make([][]rune, h)
+	for i := range h {
+		newData[i] = make([]rune, w)
+		for j := range w {
+			newData[i][j] = ' '
+		}
+	}
 	b.W = w
 	b.H = h
+	b.Data = newData
 }
 
 func (b *Buffer) GetObjects() [][]rune {
