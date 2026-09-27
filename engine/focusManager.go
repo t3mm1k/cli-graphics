@@ -36,6 +36,16 @@ func (fm *FocusManager) SetFocused(id uuid.UUID) {
 	}
 }
 
+func (fm *FocusManager) GetFocused() uuid.UUID {
+	fm.mu.RLock()
+	defer fm.mu.RUnlock()
+
+	if fm.current == -1 || fm.current >= len(fm.order) {
+		return uuid.Nil
+	}
+	return fm.order[fm.current]
+}
+
 func (fm *FocusManager) focusCurrent() {
 	if fm.current == -1 || fm.current >= len(fm.order) {
 		return
