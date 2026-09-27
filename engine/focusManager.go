@@ -36,6 +36,7 @@ func (fm *FocusManager) SetFocused(id uuid.UUID) {
 	}
 }
 
+
 func (fm *FocusManager) GetFocused() uuid.UUID {
 	fm.mu.RLock()
 	defer fm.mu.RUnlock()
@@ -44,6 +45,25 @@ func (fm *FocusManager) GetFocused() uuid.UUID {
 		return uuid.Nil
 	}
 	return fm.order[fm.current]
+}
+
+func (fm *FocusManager) FocusNext() {
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
+
+	if len(fm.order) == 0 {
+		return
+	}
+
+	fm.blurCurrent()
+
+	if fm.current == -1 {
+		fm.current = 0
+	} else {
+		fm.current = (fm.current + 1) % len(fm.order)
+	}
+
+	fm.focusCurrent()
 }
 
 func (fm *FocusManager) focusCurrent() {
@@ -58,16 +78,6 @@ func (fm *FocusManager) focusCurrent() {
 	if focusable, ok := comp.(Focusable); ok {
 		focusable.SetFocus(true)
 	}
-}
-
-func (fm *FocusManager) GetFocused() uuid.UUID {
-	fm.mu.RLock()
-	defer fm.mu.RUnlock()
-
-	if fm.current == -1 || fm.current >= len(fm.order) {
-		return uuid.Nil
-	}
-	return fm.order[fm.current]
 }
 
 func (fm *FocusManager) blurCurrent() {
