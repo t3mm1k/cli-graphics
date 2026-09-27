@@ -12,8 +12,6 @@ type Input struct {
 
 	value []rune //TODO ПОМЕНЯТЬ НА []rune
 
-	isFocused bool
-
 	cursorIsVisible bool
 
 	cursorPos int
@@ -24,7 +22,6 @@ type Input struct {
 }
 
 func (i *Input) SetFocus(focused bool) {
-	i.isFocused = focused
 	if focused {
 		i.cursorIsVisible = true
 	} else {
@@ -169,6 +166,6 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 
 	engine.Registry.AddComponent(input)
 	engine.FocusManagerInstance.Register(id)
-	
+
 	return input
 }
