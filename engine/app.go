@@ -81,6 +81,7 @@ func (a *App) Run() error {
 	ticker := time.NewTicker(a.tickRate)
 	defer ticker.Stop()
 
+	a.running = true
 	a.draw()
 
 	for {
