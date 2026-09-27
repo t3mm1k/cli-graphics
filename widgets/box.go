@@ -9,9 +9,7 @@ import (
 type Box struct {
 	engine.BaseComponent
 	children []engine.Component
-
-	focusedIndex int
-	focused      bool
+	focused  bool
 }
 
 func (b *Box) IsFocused() bool {
@@ -36,9 +34,7 @@ func (b *Box) Render(canvas *engine.Canvas) {
 	for _, child := range b.children {
 		x, y := child.GetCoords()
 		w, h := child.GetSize()
-
 		childCanvas := canvas.SubCanvas(x, y, w, h)
-
 		child.Render(childCanvas)
 	}
 }
@@ -62,68 +58,25 @@ func (b *Box) AddChild(child engine.Component) {
 	engine.Registry.SetParent(child.GetId(), b.GetId())
 }
 
-func (b *Box) findNextFocusableChild(st int) int {
-	for i := st; i < len(b.children); i++ {
-		if _, ok := b.children[i].(engine.Focusable); ok {
-			return i
-		}
-	}
-	return -1
-}
-
 func (b *Box) SetFocus(focused bool) {
 	b.focused = focused
-
-	if focused {
-		b.focusedIndex = b.findNextFocusableChild(0)
-
-		if b.focusedIndex != -1 {
-			if focusable, ok := b.children[b.focusedIndex].(engine.Focusable); ok {
-				focusable.SetFocus(true)
-			}
-		}
-	} else {
-		if b.focusedIndex != -1 {
-			if focusable, ok := b.children[b.focusedIndex].(engine.Focusable); ok {
-				focusable.SetFocus(false)
-			}
-		}
-
-		b.focusedIndex = 0
-	}
 }
 
 func (b *Box) HandleKey(key string) bool {
 
-	if len(b.children) == 0 || b.focusedIndex == -1 {
+	focusedId := engine.FocusManagerInstance.GetFocused()
+	if focusedId == uuid.Nil {
 		return false
 	}
 
-	child := b.children[b.focusedIndex]
-	activeChild, isFocusable := child.(engine.Focusable)
-
-	if isFocusable && activeChild.HandleKey(key) {
-		return true
+	comp, exists := engine.Registry.GetComponent(focusedId)
+	if !exists {
+		return false
 	}
 
-	if key == "Tab" {
-		nextIndex := b.findNextFocusableChild(b.focusedIndex + 1)
-		if nextIndex != -1 {
-			if isFocusable {
-				activeChild.SetFocus(false)
-			}
-			b.focusedIndex = nextIndex
-			if focusable, ok := b.children[nextIndex].(engine.Focusable); ok {
-				focusable.SetFocus(true)
-			}
-			return true
-		} else {
-			if isFocusable {
-				activeChild.SetFocus(false)
-			}
-			b.focusedIndex = -1
-			return false
-		}
+	if f, ok := comp.(engine.Focusable); ok {
+		return f.HandleKey(key)
 	}
+
 	return false
 }

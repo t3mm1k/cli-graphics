@@ -10,9 +10,7 @@ import (
 type Input struct {
 	engine.BaseComponent
 
-	value []rune //TODO ПОМЕНЯТЬ НА []rune
-
-	isFocused bool
+	value []rune
 
 	cursorIsVisible bool
 
@@ -24,7 +22,6 @@ type Input struct {
 }
 
 func (i *Input) SetFocus(focused bool) {
-	i.isFocused = focused
 	if focused {
 		i.cursorIsVisible = true
 	} else {
@@ -44,7 +41,7 @@ func (i *Input) SetValue(value []rune) {
 }
 
 func (i *Input) IsFocused() bool {
-	return i.isFocused
+	return engine.FocusManagerInstance.GetFocused() == i.GetId()
 }
 
 func (i *Input) HandleKey(key string) bool {
@@ -59,7 +56,6 @@ func (i *Input) HandleKey(key string) bool {
 		if len(i.value) == 0 || i.cursorPos == 0 {
 			return true
 		}
-
 		i.value = append(i.value[:i.cursorPos-1], i.value[i.cursorPos:]...)
 		i.cursorPos--
 
@@ -77,28 +73,19 @@ func (i *Input) HandleKey(key string) bool {
 
 	default:
 		runesKey := []rune(key)
-		if len(runesKey) > 1 && key != "Space" {
+		if len(runesKey) != 1 {
 			return true
 		}
 
-		inputChar := key
-		if inputChar == "Space" {
-			inputChar = " "
-		}
-
-		if i.Filter != nil && !i.Filter(inputChar) {
+		if i.Filter != nil && !i.Filter(key) {
 			return true
 		}
-		charToInsert := runesKey[0]
-		if inputChar == " " {
-			charToInsert = ' '
-		}
 
-		i.value = append(i.value[:i.cursorPos], append([]rune{charToInsert}, i.value[i.cursorPos:]...)...)
+		i.value = append(i.value[:i.cursorPos], append([]rune{runesKey[0]}, i.value[i.cursorPos:]...)...)
 		i.cursorPos++
 
 		if i.OnInput != nil {
-			i.OnInput(inputChar)
+			i.OnInput(key)
 		}
 	}
 
@@ -106,7 +93,7 @@ func (i *Input) HandleKey(key string) bool {
 }
 
 func (i *Input) OnTick() {
-	if i.isFocused {
+	if i.IsFocused() {
 		i.cursorIsVisible = !i.cursorIsVisible
 	}
 }
@@ -115,7 +102,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 	w, h := i.GetSize()
 
 	borderStyle := engine.BorderSingle
-	if i.isFocused {
+	if i.IsFocused() {
 		borderStyle = engine.BorderDouble
 	}
 
@@ -142,7 +129,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 		}
 	}
 
-	if i.isFocused && i.cursorIsVisible {
+	if i.IsFocused() && i.cursorIsVisible {
 		visualCursorPos := i.cursorPos - start
 		if visualCursorPos >= 0 && visualCursorPos < textW {
 			canvas.SetRune(1+visualCursorPos, 1, '_')
@@ -168,6 +155,7 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 	}
 
 	engine.Registry.AddComponent(input)
+	engine.FocusManagerInstance.Register(id)
 
 	return input
 }
