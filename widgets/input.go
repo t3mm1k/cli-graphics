@@ -56,7 +56,6 @@ func (i *Input) HandleKey(key string) bool {
 		if len(i.value) == 0 || i.cursorPos == 0 {
 			return true
 		}
-
 		i.value = append(i.value[:i.cursorPos-1], i.value[i.cursorPos:]...)
 		i.cursorPos--
 
@@ -74,28 +73,19 @@ func (i *Input) HandleKey(key string) bool {
 
 	default:
 		runesKey := []rune(key)
-		if len(runesKey) > 1 && key != "Space" {
+		if len(runesKey) != 1 {
 			return true
 		}
 
-		inputChar := key
-		if inputChar == "Space" {
-			inputChar = " "
-		}
-
-		if i.Filter != nil && !i.Filter(inputChar) {
+		if i.Filter != nil && !i.Filter(key) {
 			return true
 		}
-		charToInsert := runesKey[0]
-		if inputChar == " " {
-			charToInsert = ' '
-		}
 
-		i.value = append(i.value[:i.cursorPos], append([]rune{charToInsert}, i.value[i.cursorPos:]...)...)
+		i.value = append(i.value[:i.cursorPos], append([]rune{runesKey[0]}, i.value[i.cursorPos:]...)...)
 		i.cursorPos++
 
 		if i.OnInput != nil {
-			i.OnInput(inputChar)
+			i.OnInput(key)
 		}
 	}
 
