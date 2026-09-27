@@ -19,6 +19,23 @@ type Cell struct {
 	BgColor Color
 }
 
+func NewCell(r rune) Cell {
+	return Cell{
+		R:       r,
+		FgColor: ColorDefault(),
+		BgColor: ColorDefault(),
+	}
+}
+
+func NewCellColored(fg, bg Color, r rune) Cell {
+	return Cell{
+		R:       r,
+		FgColor: fg,
+		BgColor: bg,
+	}
+}
+
+// Константы цветов, надо расширить)
 var (
 	ColorRed   = Color{R: 255, G: 0, B: 0, IsDefault: false}
 	ColorGreen = Color{R: 0, G: 255, B: 0, IsDefault: false}
