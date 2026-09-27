@@ -127,7 +127,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 	}
 
 	for col := 0; col < textW; col++ {
-		canvas.SetCell(1+col, 1, ' ')
+		canvas.SetRune(1+col, 1, ' ')
 	}
 
 	start := 0
@@ -138,14 +138,14 @@ func (i *Input) Render(canvas *engine.Canvas) {
 	for j := 0; j < textW; j++ {
 		strIndex := start + j
 		if strIndex < len(i.value) {
-			canvas.SetCell(1+j, 1, i.value[strIndex])
+			canvas.SetRune(1+j, 1, i.value[strIndex])
 		}
 	}
 
 	if i.isFocused && i.cursorIsVisible {
 		visualCursorPos := i.cursorPos - start
 		if visualCursorPos >= 0 && visualCursorPos < textW {
-			canvas.SetCell(1+visualCursorPos, 1, '_')
+			canvas.SetRune(1+visualCursorPos, 1, '_')
 		}
 	}
 }
