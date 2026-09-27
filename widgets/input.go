@@ -10,7 +10,7 @@ import (
 type Input struct {
 	engine.BaseComponent
 
-	value []rune //TODO ПОМЕНЯТЬ НА []rune
+	value []rune
 
 	cursorIsVisible bool
 
