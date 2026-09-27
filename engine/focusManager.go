@@ -66,6 +66,25 @@ func (fm *FocusManager) FocusNext() {
 	fm.focusCurrent()
 }
 
+func (fm *FocusManager) FocusPrev() {
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
+
+	if len(fm.order) == 0 {
+		return
+	}
+
+	fm.blurCurrent()
+
+	if fm.current == -1 {
+		fm.current = len(fm.order) - 1
+	} else {
+		fm.current = (fm.current - 1 + len(fm.order)) % len(fm.order)
+	}
+
+	fm.focusCurrent()
+}
+
 func (fm *FocusManager) focusCurrent() {
 	if fm.current == -1 || fm.current >= len(fm.order) {
 		return
