@@ -41,7 +41,7 @@ func (i *Input) SetValue(value []rune) {
 }
 
 func (i *Input) IsFocused() bool {
-	return i.isFocused
+	return engine.FocusManagerInstance.GetFocused() == i.GetId()
 }
 
 func (i *Input) HandleKey(key string) bool {
