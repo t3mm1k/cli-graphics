@@ -1,5 +1,7 @@
 package engine
 
+import "image/color"
+
 type Color struct {
 	R, G, B   uint8
 	IsDefault bool
@@ -33,6 +35,11 @@ func NewCellColored(r rune, fg, bg Color) Cell {
 		FgColor: fg,
 		BgColor: bg,
 	}
+}
+
+func ToEngineColor(c color.Color) Color {
+	r, g, b, _ := c.RGBA()
+	return Color{R: uint8(r >> 8), G: uint8(g >> 8), B: uint8(b >> 8)}
 }
 
 // Константы цветов, надо расширить)
