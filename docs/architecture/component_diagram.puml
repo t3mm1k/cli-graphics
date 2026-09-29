@@ -1,0 +1,50 @@
+@startuml
+!include <C4/C4_Container>
+
+' Включаем легенду
+LAYOUT_WITH_LEGEND()
+
+title Компонентная диаграмма движка CLI-Graphics (C4 Model - Level 2)
+
+' Внешний пользователь
+Person(user, "Пользователь", "Взаимодействует с консольным интерфейсом через эмулятор терминала.")
+
+System_Boundary(cli_graphics, "CLI-Graphics Engine & App") {
+    
+    Container(main_app, "Main Application Module (main.go)", "Go, os/stdin", "Инициализирует дерево виджетов, создает экземпляр App и запускает цикл обработки.")
+    
+    Container(engine_app, "Application Core (engine/app.go)", "Go, горутины", "Управляет главным циклом, слушает события ввода ключей и изменения размеров терминала, оркеструет вызовы тиков и отрисовки.")
+    
+    Container(focus_manager, "Focus Manager (engine/focusManager.go)", "Go (FocusManager)", "Синхронизирует и централизованно управляет фокусом между элементами по кольцевому списку (Tab / Shift+Tab).")
+    
+    Container(registry, "Component Registry (engine/registry.go)", "Go (ComponentRegistry)", "Потокобезопасно хранит карту всех зарегистрированных UI-компонентов и связей 'родитель-потомок'.")
+    
+    Container(canvas_module, "Canvas Layer (engine/canvas.go)", "Go (Canvas)", "Предоставляет абстракцию холста и геометрические примитивы (DrawRect, DrawString, SetCell) для относительной отрисовки виджетов через саб-канвасы.")
+    
+    Container(buffer_module, "Display Buffer (engine/buffer.go)", "Go (Buffer)", "Хранит низкоуровневую двумерную матрицу рун (Data) текущего кадра и выводит её на экран через ANSI-последовательности (Flush).")
+    
+    Container(widgets_layer, "Widgets Layer (widgets/*.go)", "Go (Box, Button, Input, ListView, Label)", "Набор готовых элементов интерфейса. Реализуют интерфейсы Component и Focusable. Рендерится на переданном Canvas.")
+}
+
+System_Ext(terminal, "Эмулятор терминала (ОС)", "Принимает ANSI escape-коды для обновления дисплея, транслирует клавиатурный ввод.")
+
+' Связи (Потоки данных и вызовов)
+Rel(user, terminal, "Взаимодействует с", "Клавиатура/Экран")
+Rel(terminal, engine_app, "Передает raw-символы клавиш", "stdin stream")
+
+Rel(main_app, widgets_layer, "Строит дерево иерархии и настраивает коллбеки")
+Rel(main_app, engine_app, "Передает корневой компонент и запускает Run()")
+
+Rel(engine_app, focus_manager, "Перенаправляет системную навигацию (Tab/Shift+Tab)", "Вызовы методов")
+Rel(engine_app, widgets_layer, "Прокидывает обычные клавиши в root и вызывает OnTick()", "Интерфейсные вызовы")
+Rel(engine_app, canvas_module, "Создает глобальный холст на кадр", "Инициализация")
+Rel(engine_app, buffer_module, "Очищает перед кадром и вызывает Flush() в stdout", "Прямой вызов")
+
+Rel(widgets_layer, canvas_module, "Отрисовывает себя и создает вложенные подхолсты (SubCanvas)", "DrawRect / DrawString")
+Rel(widgets_layer, focus_manager, "Регистрирует себя при создании и проверяет фокус через GetFocused()", "Вызовы методов")
+Rel(widgets_layer, registry, "Добавляет себя в реестр компонентов", "AddComponent")
+
+Rel(canvas_module, buffer_module, "Записывает финальные символы в глобальную матрицу кадра", "Прямая модификация Data")
+Rel(buffer_module, terminal, "Сбрасывает ANSI последовательности кадра", "stdout stream")
+
+@endum
