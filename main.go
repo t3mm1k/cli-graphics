@@ -13,12 +13,8 @@ import (
 
 func main() {
 	rootScreen := widgets.NewBox(0, 0, 80, 24)
-	window1 := widgets.NewBox(5, 6, 30, 10)
-	input := widgets.NewInput(1, 2, 18, nil)
-	btnImage := widgets.NewButton(40, 20, "Image", nil)
-	picture := widgets.NewImage(40, 1, 40, 20, nil)
-	rootScreen.AddChild(input)
-	rootScreen.AddChild(window1)
+	btnImage := widgets.NewButton(10, 20, "Image", nil)
+	picture := widgets.NewImage(40, 10, 40, 20, nil)
 	rootScreen.AddChild(btnImage)
 	rootScreen.AddChild(picture)
 	rootScreen.SetFocus(true)
