@@ -1,0 +1,104 @@
+@startuml
+' Настройка стиля схемы
+hide circle
+skinparam linetype ortho
+skinparam monochrome false
+
+title ER-диаграмма модели данных движка CLI-Graphics (В соответствии с 3НФ)
+
+entity "Application" as app {
+  * id : uuid [PK]
+  --
+  * tick_rate_ms : integer
+  * is_running : boolean
+  * enable_logging : boolean
+}
+
+entity "Component" as comp {
+  * id : uuid [PK]
+  --
+  * type : varchar
+  * parent_id : uuid [FK]
+  * is_focused : boolean
+}
+
+entity "Geometry" as geom {
+  * component_id : uuid [PK, FK]
+  --
+  * x : integer
+  * y : integer
+  * width : integer
+  * height : integer
+}
+
+entity "Button_Properties" as btn {
+  * component_id : uuid [PK, FK]
+  --
+  * text : text
+}
+
+entity "Input_Properties" as input {
+  * component_id : uuid [PK, FK]
+  --
+  * value : text
+  * cursor_pos : integer
+  * cursor_visible : boolean
+}
+
+entity "ListView_Lines" as list_line {
+  * id : integer [PK]
+  * component_id : uuid [FK]
+  --
+  * line_order : integer
+  * text_value : text
+}
+
+entity "Display_Buffer" as buf {
+  * id : uuid [PK]
+  * app_id : uuid [FK]
+  --
+  * width : integer
+  * height : integer
+}
+
+entity "Buffer_Cell" as cell {
+  * buffer_id : uuid [PK, FK]
+  * row_index : integer [PK]
+  * col_index : integer [PK]
+  --
+  * char_value : char
+}
+
+entity "Log_File" as log_file {
+  * id : uuid [PK]
+  * app_id : uuid [FK]
+  --
+  * filename : varchar
+}
+
+entity "Log_Record" as log_rec {
+  * id : integer [PK]
+  * log_file_id : uuid [FK]
+  --
+  * timestamp : datetime
+  * level : varchar
+  * message : text
+  * error_context : text
+}
+
+' Отношения и связи между сущностями
+app -- buf : "инициализирует"
+buf -- cell : "состоит из матрицы"
+
+app -- log_file : "пишет в"
+log_file -- log_rec : "содержит записи"
+
+comp -- geom : "обладает размерами"
+comp -- comp : "иерархия родителеи"
+
+' Наследование/Связи спецификации сущностей UI компонентов
+comp -- btn : "расширяется свойствами"
+comp -- input : "расширяется свойствами"
+comp -- list_line : "содержит строки"
+
+@endum
