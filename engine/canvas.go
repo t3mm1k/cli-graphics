@@ -61,28 +61,41 @@ func (c *Canvas) DrawString(x, y int, s string) {
 	}
 }
 
-func (c *Canvas) DrawRect(x, y, w, h int, borderStyle ...BorderStyle) { //TODO добавить стили так же
+func (c *Canvas) DrawRect(x, y, w, h int, borderStyle BorderStyle, borderColor Color, bgColor Color) {
 	if w < 2 || h < 2 {
 		return
 	}
 
-	style := BorderSingle
-	if len(borderStyle) > 0 {
-		style = borderStyle[0]
+	// Заливаем фон внутренности (без обводки)
+	// Вариант А: фон только внутри, обводка с дефолтным цветом
+	// Вариант Б: фон включая обводку
+	// Выбран Вариант А — обводка остаётся с borderColor, фон только внутри
+	if !bgColor.IsDefault {
+		c.Fill(x+1, y+1, w-2, h-2, NewCellColored(' ', ColorDefault(), bgColor))
 	}
+
 	var hLine, vLine Cell
 	var tl, tr, bl, br Cell
 
-	switch style {
+	switch borderStyle {
 	case BorderDouble:
-		hLine, vLine = NewCell('═'), NewCell('║')
-		tl, tr, bl, br = NewCell('╔'), NewCell('╗'), NewCell('╚'), NewCell('╝')
+		hLine, vLine = NewCellColored('═', borderColor, ColorDefault()), NewCellColored('║', borderColor, ColorDefault())
+		tl = NewCellColored('╔', borderColor, ColorDefault())
+		tr = NewCellColored('╗', borderColor, ColorDefault())
+		bl = NewCellColored('╚', borderColor, ColorDefault())
+		br = NewCellColored('╝', borderColor, ColorDefault())
 	case BorderRounded:
-		hLine, vLine = NewCell('─'), NewCell('│')
-		tl, tr, bl, br = NewCell('╭'), NewCell('╮'), NewCell('╰'), NewCell('╯')
-	default:
-		hLine, vLine = NewCell('─'), NewCell('│')
-		tl, tr, bl, br = NewCell('┌'), NewCell('┐'), NewCell('└'), NewCell('┘')
+		hLine, vLine = NewCellColored('─', borderColor, ColorDefault()), NewCellColored('│', borderColor, ColorDefault())
+		tl = NewCellColored('╭', borderColor, ColorDefault())
+		tr = NewCellColored('╮', borderColor, ColorDefault())
+		bl = NewCellColored('╰', borderColor, ColorDefault())
+		br = NewCellColored('╯', borderColor, ColorDefault())
+	default: // BorderSingle
+		hLine, vLine = NewCellColored('─', borderColor, ColorDefault()), NewCellColored('│', borderColor, ColorDefault())
+		tl = NewCellColored('┌', borderColor, ColorDefault())
+		tr = NewCellColored('┐', borderColor, ColorDefault())
+		bl = NewCellColored('└', borderColor, ColorDefault())
+		br = NewCellColored('┘', borderColor, ColorDefault())
 	}
 
 	for col := x + 1; col < x+w-1; col++ {
