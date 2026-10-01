@@ -194,7 +194,7 @@ func TestCanvas_DrawString(t *testing.T) {
 	t.Run("renders string horizontally", func(t *testing.T) {
 		buf.Clear()
 		canvas := NewCanvas(buf)
-		canvas.DrawString(2, 1, "GO")
+		canvas.DrawString(2, 1, "GO", ColorDefault())
 
 		assert.Equal(t, 'G', buf.Data[1][2].R)
 		assert.Equal(t, 'O', buf.Data[1][3].R)
@@ -204,7 +204,7 @@ func TestCanvas_DrawString(t *testing.T) {
 	t.Run("clips string at canvas boundary", func(t *testing.T) {
 		buf.Clear()
 		sub := NewCanvas(buf).SubCanvas(0, 0, 4, 3)
-		sub.DrawString(0, 0, "TOOLONG")
+		sub.DrawString(0, 0, "TOOLONG", ColorDefault())
 
 		assert.Equal(t, 'T', buf.Data[0][0].R)
 		assert.Equal(t, 'O', buf.Data[0][1].R)
