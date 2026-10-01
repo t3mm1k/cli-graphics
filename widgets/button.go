@@ -62,10 +62,12 @@ func (b *Button) Render(canvas *engine.Canvas) {
 	w, h := b.GetSize()
 
 	borderStyle := engine.BorderSingle
+	borderColor := engine.ColorDimGray
 	if b.IsFocused() {
 		borderStyle = engine.BorderDouble
+		borderColor = engine.ColorNeonCyan
 	}
 
-	canvas.DrawRect(0, 0, w, h, borderStyle, engine.ColorDefault(), engine.ColorDefault())
-	canvas.DrawString(1, 1, b.text, engine.ColorDefault())
+	canvas.DrawRect(0, 0, w, h, borderStyle, borderColor, engine.ColorDefault())
+	canvas.DrawString(1, 1, b.text, engine.ColorWhite)
 }

@@ -102,11 +102,13 @@ func (i *Input) Render(canvas *engine.Canvas) {
 	w, h := i.GetSize()
 
 	borderStyle := engine.BorderSingle
+	borderColor := engine.ColorDimGray
 	if i.IsFocused() {
 		borderStyle = engine.BorderDouble
+		borderColor = engine.ColorNeonGreen // Зеленая рамка для активного ввода
 	}
 
-	canvas.DrawRect(0, 0, w, h, borderStyle, engine.ColorDefault(), engine.ColorDefault())
+	canvas.DrawRect(0, 0, w, h, borderStyle, borderColor, engine.ColorDefault())
 
 	textW := w - 2
 	if textW <= 0 {
@@ -125,17 +127,22 @@ func (i *Input) Render(canvas *engine.Canvas) {
 	for j := 0; j < textW; j++ {
 		strIndex := start + j
 		if strIndex < len(i.value) {
-			canvas.SetRune(1+j, 1, i.value[strIndex])
+			// Передаем белый цвет для вводимого текста
+			cell := engine.NewCellColored(i.value[strIndex], engine.ColorWhite, engine.ColorDefault())
+			canvas.SetCell(1+j, 1, cell)
 		}
 	}
 
 	if i.IsFocused() && i.cursorIsVisible {
 		visualCursorPos := i.cursorPos - start
 		if visualCursorPos >= 0 && visualCursorPos < textW {
-			canvas.SetRune(1+visualCursorPos, 1, '_')
+			// Подсвечиваем курсор цветом рамки
+			cursorCell := engine.NewCellColored('_', engine.ColorNeonGreen, engine.ColorDefault())
+			canvas.SetCell(1+visualCursorPos, 1, cursorCell)
 		}
 	}
 }
+
 
 func NewInput(x, y, w int, onInput func(key string)) *Input {
 	id := uuid.New()
