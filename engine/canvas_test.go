@@ -221,14 +221,14 @@ func TestCanvas_DrawRect(t *testing.T) {
 	t.Run("ignores dimensions smaller than 2", func(t *testing.T) {
 		buf.Clear()
 		canvas := NewCanvas(buf)
-		canvas.DrawRect(0, 0, 1, 5)
+		canvas.DrawRect(0, 0, 1, 5, BorderSingle, ColorDefault(), ColorDefault())
 		assert.Equal(t, NewCell(' '), buf.Data[0][0])
 	})
 
 	t.Run("draws single border correctly", func(t *testing.T) {
 		buf.Clear()
 		canvas := NewCanvas(buf)
-		canvas.DrawRect(1, 1, 4, 3, BorderSingle)
+		canvas.DrawRect(1, 1, 4, 3, BorderSingle, ColorDefault(), ColorDefault())
 
 		// Углы
 		assert.Equal(t, '┌', buf.Data[1][1].R)
@@ -250,12 +250,12 @@ func TestCanvas_DrawRect(t *testing.T) {
 	t.Run("draws rounded and double borders", func(t *testing.T) {
 		buf.Clear()
 		canvas := NewCanvas(buf)
-		canvas.DrawRect(0, 0, 3, 3, BorderRounded)
+		canvas.DrawRect(0, 0, 3, 3, BorderRounded, ColorDefault(), ColorDefault())
 		assert.Equal(t, '╭', buf.Data[0][0].R)
 		assert.Equal(t, '╯', buf.Data[2][2].R)
 
 		buf.Clear()
-		canvas.DrawRect(0, 0, 3, 3, BorderDouble)
+		canvas.DrawRect(0, 0, 3, 3, BorderDouble, ColorDefault(), ColorDefault())
 		assert.Equal(t, '╔', buf.Data[0][0].R)
 		assert.Equal(t, '╝', buf.Data[2][2].R)
 	})
