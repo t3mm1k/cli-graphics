@@ -80,15 +80,6 @@ func TestCanvas_SetCell(t *testing.T) {
 	}
 }
 
-func TestCanvas_SetRune(t *testing.T) {
-	buf, err := NewBuffer(5, 5)
-	require.NoError(t, err)
-	canvas := NewCanvas(buf)
-
-	canvas.SetRune(1, 1, 'Q')
-	assert.Equal(t, NewCell('Q'), buf.Data[1][1])
-}
-
 func TestCanvas_SubCanvas(t *testing.T) {
 	buf, err := NewBuffer(30, 20)
 	require.NoError(t, err)
@@ -187,76 +178,134 @@ func TestCanvas_SubCanvas(t *testing.T) {
 	}
 }
 
-func TestCanvas_DrawString(t *testing.T) {
-	buf, err := NewBuffer(10, 5)
+func TestCanvas_SetRune(t *testing.T) {
+	buf, err := NewBuffer(5, 5)
 	require.NoError(t, err)
+	canvas := NewCanvas(buf)
 
-	t.Run("renders string horizontally", func(t *testing.T) {
-		buf.Clear()
-		canvas := NewCanvas(buf)
-		canvas.DrawString(2, 1, "GO")
+	tests := []struct {
+		name string
+		x, y int
+		r    rune
+	}{
+		{name: "set custom rune", x: 1, y: 1, r: 'Q'},
+	}
 
-		assert.Equal(t, 'G', buf.Data[1][2].R)
-		assert.Equal(t, 'O', buf.Data[1][3].R)
-		assert.Equal(t, ' ', buf.Data[1][4].R)
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf.Clear()
+			canvas.SetRune(tt.x, tt.y, tt.r)
+			assert.Equal(t, NewCell(tt.r), buf.Data[tt.y][tt.x])
+		})
+	}
+}
 
-	t.Run("clips string at canvas boundary", func(t *testing.T) {
-		buf.Clear()
-		sub := NewCanvas(buf).SubCanvas(0, 0, 4, 3)
-		sub.DrawString(0, 0, "TOOLONG")
+func TestCanvas_DrawString(t *testing.T) {
+	tests := []struct {
+		name       string
+		bufW, bufH int
+		setup      func(c *Canvas)
+		verify     func(t *testing.T, b *Buffer)
+	}{
+		{
+			name: "renders string horizontally",
+			bufW: 10, bufH: 5,
+			setup: func(c *Canvas) {
+				c.DrawString(2, 1, "GO", ColorDefault())
+			},
+			verify: func(t *testing.T, b *Buffer) {
+				assert.Equal(t, 'G', b.Data[1][2].R)
+				assert.Equal(t, 'O', b.Data[1][3].R)
+				assert.Equal(t, ' ', b.Data[1][4].R)
+			},
+		},
+		{
+			name: "clips string at canvas boundary",
+			bufW: 10, bufH: 5,
+			setup: func(c *Canvas) {
+				sub := c.SubCanvas(0, 0, 4, 3)
+				sub.DrawString(0, 0, "TOOLONG", ColorDefault())
+			},
+			verify: func(t *testing.T, b *Buffer) {
+				assert.Equal(t, 'T', b.Data[0][0].R)
+				assert.Equal(t, 'O', b.Data[0][1].R)
+				assert.Equal(t, 'O', b.Data[0][2].R)
+				assert.Equal(t, 'L', b.Data[0][3].R)
+				assert.Equal(t, ' ', b.Data[0][4].R) // 5-й символ обрезан
+			},
+		},
+	}
 
-		assert.Equal(t, 'T', buf.Data[0][0].R)
-		assert.Equal(t, 'O', buf.Data[0][1].R)
-		assert.Equal(t, 'O', buf.Data[0][2].R)
-		assert.Equal(t, 'L', buf.Data[0][3].R)
-		assert.Equal(t, ' ', buf.Data[0][4].R) // 5-й символ не нарисовался
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf, err := NewBuffer(tt.bufW, tt.bufH)
+			require.NoError(t, err)
+			canvas := NewCanvas(buf)
+
+			tt.setup(canvas)
+			tt.verify(t, buf)
+		})
+	}
 }
 
 func TestCanvas_DrawRect(t *testing.T) {
-	buf, err := NewBuffer(10, 10)
-	require.NoError(t, err)
+	tests := []struct {
+		name       string
+		x, y, w, h int
+		style      BorderStyle
+		verify     func(t *testing.T, b *Buffer)
+	}{
+		{
+			name:       "ignores dimensions smaller than 2",
+			x: 0, y: 0, w: 1, h: 5,
+			style: BorderSingle,
+			verify: func(t *testing.T, b *Buffer) {
+				assert.Equal(t, NewCell(' '), b.Data[0][0])
+			},
+		},
+		{
+			name:       "draws single border correctly",
+			x: 1, y: 1, w: 4, h: 3,
+			style: BorderSingle,
+			verify: func(t *testing.T, b *Buffer) {
+				// Углы
+				assert.Equal(t, '┌', b.Data[1][1].R)
+				assert.Equal(t, '┐', b.Data[1][4].R)
+				assert.Equal(t, '└', b.Data[3][1].R)
+				assert.Equal(t, '┘', b.Data[3][4].R)
+				// Линии
+				assert.Equal(t, '─', b.Data[1][2].R)
+				assert.Equal(t, '│', b.Data[2][1].R)
+			},
+		},
+		{
+			name:       "draws rounded border",
+			x: 0, y: 0, w: 3, h: 3,
+			style: BorderRounded,
+			verify: func(t *testing.T, b *Buffer) {
+				assert.Equal(t, '╭', b.Data[0][0].R)
+				assert.Equal(t, '╯', b.Data[2][2].R)
+			},
+		},
+		{
+			name:       "draws double border",
+			x: 0, y: 0, w: 3, h: 3,
+			style: BorderDouble,
+			verify: func(t *testing.T, b *Buffer) {
+				assert.Equal(t, '╔', b.Data[0][0].R)
+				assert.Equal(t, '╝', b.Data[2][2].R)
+			},
+		},
+	}
 
-	t.Run("ignores dimensions smaller than 2", func(t *testing.T) {
-		buf.Clear()
-		canvas := NewCanvas(buf)
-		canvas.DrawRect(0, 0, 1, 5)
-		assert.Equal(t, NewCell(' '), buf.Data[0][0])
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf, err := NewBuffer(10, 10)
+			require.NoError(t, err)
+			canvas := NewCanvas(buf)
 
-	t.Run("draws single border correctly", func(t *testing.T) {
-		buf.Clear()
-		canvas := NewCanvas(buf)
-		canvas.DrawRect(1, 1, 4, 3, BorderSingle)
-
-		// Углы
-		assert.Equal(t, '┌', buf.Data[1][1].R)
-		assert.Equal(t, '┐', buf.Data[1][4].R)
-		assert.Equal(t, '└', buf.Data[3][1].R)
-		assert.Equal(t, '┘', buf.Data[3][4].R)
-
-		// Горизонтальные линии
-		assert.Equal(t, '─', buf.Data[1][2].R)
-		assert.Equal(t, '─', buf.Data[1][3].R)
-		assert.Equal(t, '─', buf.Data[3][2].R)
-		assert.Equal(t, '─', buf.Data[3][3].R)
-
-		// Вертикальные линии
-		assert.Equal(t, '│', buf.Data[2][1].R)
-		assert.Equal(t, '│', buf.Data[2][4].R)
-	})
-
-	t.Run("draws rounded and double borders", func(t *testing.T) {
-		buf.Clear()
-		canvas := NewCanvas(buf)
-		canvas.DrawRect(0, 0, 3, 3, BorderRounded)
-		assert.Equal(t, '╭', buf.Data[0][0].R)
-		assert.Equal(t, '╯', buf.Data[2][2].R)
-
-		buf.Clear()
-		canvas.DrawRect(0, 0, 3, 3, BorderDouble)
-		assert.Equal(t, '╔', buf.Data[0][0].R)
-		assert.Equal(t, '╝', buf.Data[2][2].R)
-	})
+			canvas.DrawRect(tt.x, tt.y, tt.w, tt.h, tt.style, ColorDefault(), ColorDefault())
+			tt.verify(t, buf)
+		})
+	}
 }

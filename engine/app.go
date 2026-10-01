@@ -234,7 +234,8 @@ func (a *App) draw() {
 	a.buffer.Clear()
 	canvas := NewCanvas(a.buffer)
 	a.root.Render(canvas)
-	a.buffer.Flush()
+	// a.buffer.Flush()
+	fmt.Print(a.buffer.Flush()) 
 }
 
 func (a *App) Post(action func()) {

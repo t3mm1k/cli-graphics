@@ -12,6 +12,8 @@ type Button struct {
 	engine.BaseComponent
 
 	text    string
+	borderColor     engine.Color
+	focusColor      engine.Color
 	OnClick func()
 }
 
@@ -22,6 +24,8 @@ func NewButton(x, y int, text string, onClick func()) *Button {
 	btn := &Button{
 		BaseComponent: engine.NewBaseComponent(id, x, y, width, height),
 		text:          text,
+		borderColor: engine.ColorDimGray,
+		focusColor:  engine.ColorNeonCyan,
 		OnClick:       onClick,
 	}
 
@@ -62,10 +66,17 @@ func (b *Button) Render(canvas *engine.Canvas) {
 	w, h := b.GetSize()
 
 	borderStyle := engine.BorderSingle
+	borderColor := b.borderColor
 	if b.IsFocused() {
 		borderStyle = engine.BorderDouble
+		borderColor = b.focusColor
 	}
 
-	canvas.DrawRect(0, 0, w, h, borderStyle)
-	canvas.DrawString(1, 1, b.text)
+	canvas.DrawRect(0, 0, w, h, borderStyle, borderColor, engine.ColorDefault())
+	canvas.DrawString(1, 1, b.text, engine.ColorDefault())
+}
+
+func (b *Button) SetColors(normal, focus engine.Color) {
+	b.borderColor = normal
+	b.focusColor = focus
 }

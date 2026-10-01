@@ -74,15 +74,33 @@ func (b *Buffer) ClearRegion(x, y, w, h int) {
 	}
 }
 
-func (b *Buffer) Flush() {
-	var builder strings.Builder
+func resetTextStyle(builder *strings.Builder, style TextStyle) {
+	switch style {
+	case TextStyleBold, TextStyleDim:
+		builder.WriteString("\033[22m")
+	case TextStyleItalic:
+		builder.WriteString("\033[23m")
+	case TextStyleUnderline:
+		builder.WriteString("\033[24m")
+	case TextStyleBlink:
+		builder.WriteString("\033[25m")
+	case TextStyleReverse:
+		builder.WriteString("\033[27m")
+	case TextStyleHidden:
+		builder.WriteString("\033[28m")
+	case TextStyleStrikethrough:
+		builder.WriteString("\033[29m")
+	}
+}
 
-	builder.WriteString("\u001B[H")
+func (b *Buffer) Flush() string {
+    var builder strings.Builder
 
-	lastFg := ColorDefault()
-	lastBg := ColorDefault()
+    lastFg := ColorDefault()
+    lastBg := ColorDefault()
+    lastStyle := TextStyleDefault
 
-	for y, row := range b.Data {
+    for y, row := range b.Data {
 		for _, cell := range row {
 			if cell.BgColor != lastBg {
 				if cell.BgColor.IsDefault {
@@ -102,6 +120,17 @@ func (b *Buffer) Flush() {
 				lastFg = cell.FgColor
 			}
 
+			if cell.Style != lastStyle {
+				if cell.Style == TextStyleDefault {
+					builder.WriteString("\033[0m")
+					lastFg = ColorDefault()
+					lastBg = ColorDefault()
+				} else {
+					builder.WriteString(getStyleANSI(cell.Style))
+				}
+				lastStyle = cell.Style
+			}
+
 			builder.WriteRune(cell.R)
 		}
 
@@ -110,5 +139,19 @@ func (b *Buffer) Flush() {
 		}
 	}
 	builder.WriteString("\033[0m")
-	fmt.Print(builder.String())
+	return builder.String()
+}
+
+func getStyleANSI(style TextStyle) string {
+    switch style {
+    case TextStyleBold:          return "\033[1m"
+    case TextStyleDim:           return "\033[2m"
+    case TextStyleItalic:        return "\033[3m"
+    case TextStyleUnderline:     return "\033[4m"
+    case TextStyleBlink:         return "\033[5m"
+    case TextStyleReverse:       return "\033[7m"
+    case TextStyleHidden:        return "\033[8m"
+    case TextStyleStrikethrough: return "\033[9m"
+    default:                     return ""
+    }
 }

@@ -8,6 +8,14 @@ const (
 	BorderRounded BorderStyle = "rounded"
 )
 
+type TextAlign uint8
+
+const (
+	TextAlignLeft TextAlign = iota
+	TextAlignCenter
+	TextAlignRight
+)
+
 type Canvas struct {
 	buffer  *Buffer
 	offsetX int
@@ -46,6 +54,16 @@ func (c *Canvas) SetCell(x, y int, cell Cell) {
 		return
 	}
 
+	existing := c.buffer.Data[globalY][globalX]
+
+	if cell.FgColor.IsDefault {
+		cell.FgColor = existing.FgColor
+	}
+
+	if cell.BgColor.IsDefault {
+		cell.BgColor = existing.BgColor
+	}
+
 	c.buffer.Data[globalY][globalX] = cell
 }
 
@@ -53,36 +71,79 @@ func (c *Canvas) SetRune(x, y int, rune rune) {
 	c.SetCell(x, y, NewCell(rune))
 }
 
-func (c *Canvas) DrawString(x, y int, s string) {
+func (c *Canvas) DrawString(x, y int, s string, fgColor Color) {
+	c.DrawStringStyled(x, y, s, fgColor, TextStyleDefault)
+}
+
+func (c *Canvas) DrawStringStyled(x, y int, s string, fgColor Color, style TextStyle) {
+	c.DrawStringAligned(x, y, s, fgColor, style, TextAlignLeft)
+}
+
+func (c *Canvas) DrawStringAligned(x, y int, s string, fgColor Color, style TextStyle, align TextAlign) {
 	r := []rune(s)
 
-	for i, cell := range r {
-		c.SetCell(x+i, y, NewCellColored(cell, ColorNeonCyan, ColorDefault())) //TODO Сделать СТИЛИ ДЛЯ СТРОК!!!
+	startX := x
+
+	switch align {
+	case TextAlignCenter:
+		startX = x - len(r)/2
+	case TextAlignRight:
+		startX = x - len(r)
+	case TextAlignLeft:
+		startX = x
+	}
+
+	for i, ch := range r {
+		globalX := c.offsetX + startX + i
+		globalY := c.offsetY + y
+
+		bgColor := ColorDefault()
+		if globalX >= 0 && globalX < c.buffer.W && globalY >= 0 && globalY < c.buffer.H {
+			bgColor = c.buffer.Data[globalY][globalX].BgColor
+		}
+
+		cell := NewCellColored(ch, fgColor, bgColor)
+		cell.Style = style
+
+		c.SetCell(startX+i, y, cell)
 	}
 }
 
-func (c *Canvas) DrawRect(x, y, w, h int, borderStyle ...BorderStyle) { //TODO добавить стили так же
+func (c *Canvas) DrawRect(x, y, w, h int, borderStyle BorderStyle, borderColor Color, bgColor Color) {
 	if w < 2 || h < 2 {
 		return
 	}
 
-	style := BorderSingle
-	if len(borderStyle) > 0 {
-		style = borderStyle[0]
+	// Заливаем фон внутренности (без обводки)
+	// Вариант А: фон только внутри, обводка с дефолтным цветом
+	// Вариант Б: фон включая обводку
+	// Выбран Вариант А — обводка остаётся с borderColor, фон только внутри
+	if !bgColor.IsDefault {
+		c.Fill(x+1, y+1, w-2, h-2, NewCellColored(' ', ColorDefault(), bgColor))
 	}
+
 	var hLine, vLine Cell
 	var tl, tr, bl, br Cell
 
-	switch style {
+	switch borderStyle {
 	case BorderDouble:
-		hLine, vLine = NewCell('═'), NewCell('║')
-		tl, tr, bl, br = NewCell('╔'), NewCell('╗'), NewCell('╚'), NewCell('╝')
+		hLine, vLine = NewCellColored('═', borderColor, ColorDefault()), NewCellColored('║', borderColor, ColorDefault())
+		tl = NewCellColored('╔', borderColor, ColorDefault())
+		tr = NewCellColored('╗', borderColor, ColorDefault())
+		bl = NewCellColored('╚', borderColor, ColorDefault())
+		br = NewCellColored('╝', borderColor, ColorDefault())
 	case BorderRounded:
-		hLine, vLine = NewCell('─'), NewCell('│')
-		tl, tr, bl, br = NewCell('╭'), NewCell('╮'), NewCell('╰'), NewCell('╯')
-	default:
-		hLine, vLine = NewCell('─'), NewCell('│')
-		tl, tr, bl, br = NewCell('┌'), NewCell('┐'), NewCell('└'), NewCell('┘')
+		hLine, vLine = NewCellColored('─', borderColor, ColorDefault()), NewCellColored('│', borderColor, ColorDefault())
+		tl = NewCellColored('╭', borderColor, ColorDefault())
+		tr = NewCellColored('╮', borderColor, ColorDefault())
+		bl = NewCellColored('╰', borderColor, ColorDefault())
+		br = NewCellColored('╯', borderColor, ColorDefault())
+	default: // BorderSingle
+		hLine, vLine = NewCellColored('─', borderColor, ColorDefault()), NewCellColored('│', borderColor, ColorDefault())
+		tl = NewCellColored('┌', borderColor, ColorDefault())
+		tr = NewCellColored('┐', borderColor, ColorDefault())
+		bl = NewCellColored('└', borderColor, ColorDefault())
+		br = NewCellColored('┘', borderColor, ColorDefault())
 	}
 
 	for col := x + 1; col < x+w-1; col++ {
@@ -99,4 +160,12 @@ func (c *Canvas) DrawRect(x, y, w, h int, borderStyle ...BorderStyle) { //TODO �
 	c.SetCell(x+w-1, y, tr)
 	c.SetCell(x, y+h-1, bl)
 	c.SetCell(x+w-1, y+h-1, br)
+}
+
+func (c *Canvas) Fill(x, y, w, h int, cell Cell) {
+	for row := y; row < y+h; row++ {
+		for col := x; col < x+w; col++ {
+			c.SetCell(col, row, cell)
+		}
+	}
 }

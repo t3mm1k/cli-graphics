@@ -29,7 +29,7 @@ func NewBox(x, y, w, h int) *Box {
 
 func (b *Box) Render(canvas *engine.Canvas) {
 	w, h := b.GetSize()
-	canvas.DrawRect(0, 0, w, h, engine.BorderSingle)
+	canvas.DrawRect(0, 0, w, h, engine.BorderSingle, engine.ColorDefault(), engine.ColorDefault())
 
 	for _, child := range b.children {
 		x, y := child.GetCoords()

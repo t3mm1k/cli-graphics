@@ -39,10 +39,10 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 func (l *Label) Render(canvas *engine.Canvas) {
 	if l.border {
 		w, h := l.GetSize()
-		canvas.DrawRect(0, 0, w, h, engine.BorderSingle)
-		canvas.DrawString(1, 1, l.text)
+		canvas.DrawRect(0, 0, w, h, engine.BorderSingle, engine.ColorDefault(), engine.ColorDefault())
+		canvas.DrawString(1, 1, l.text, engine.ColorDefault())
 	} else {
-		canvas.DrawString(0, 0, l.text)
+		canvas.DrawString(0, 0, l.text, engine.ColorDefault())
 	}
 }
 
