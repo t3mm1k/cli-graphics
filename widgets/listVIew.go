@@ -35,7 +35,7 @@ func (l *ListView) Render(canvas *engine.Canvas) {
 
 		source := "• " + line
 
-		canvas.DrawString(1, i+1, source)
+		canvas.DrawString(1, i+1, source, engine.ColorDefault())
 		//l.Print()
 	}
 }

@@ -67,5 +67,5 @@ func (b *Button) Render(canvas *engine.Canvas) {
 	}
 
 	canvas.DrawRect(0, 0, w, h, borderStyle, engine.ColorDefault(), engine.ColorDefault())
-	canvas.DrawString(1, 1, b.text)
+	canvas.DrawString(1, 1, b.text, engine.ColorDefault())
 }
