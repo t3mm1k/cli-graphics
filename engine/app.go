@@ -18,6 +18,8 @@ type App struct {
 	actions  chan func()
 	tickRate time.Duration
 
+	shortcuts map[string]func()
+
 	running  bool
 	stopOnce sync.Once
 	stopChan chan struct{}
@@ -198,7 +200,12 @@ func (a *App) handleKey(key string) {
 	}
 
 	if focusable, ok := a.root.(Focusable); ok {
-		focusable.HandleKey(key)
+		if !focusable.HandleKey(key) {
+			handler, err := a.shortcuts[key]
+			if !err {
+				handler()
+			}
+		}
 	}
 }
 
