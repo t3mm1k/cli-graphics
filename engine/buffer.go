@@ -121,27 +121,13 @@ func (b *Buffer) Flush() string {
 			}
 
 			if cell.Style != lastStyle {
-				resetTextStyle(&builder, lastStyle)
-
-				switch cell.Style {
-				case TextStyleBold:
-					builder.WriteString("\033[1m")
-				case TextStyleDim:
-					builder.WriteString("\033[2m")
-				case TextStyleItalic:
-					builder.WriteString("\033[3m")
-				case TextStyleUnderline:
-					builder.WriteString("\033[4m")
-				case TextStyleBlink:
-					builder.WriteString("\033[5m")
-				case TextStyleReverse:
-					builder.WriteString("\033[7m")
-				case TextStyleHidden:
-					builder.WriteString("\033[8m")
-				case TextStyleStrikethrough:
-					builder.WriteString("\033[9m")
+				if cell.Style == TextStyleDefault {
+					builder.WriteString("\033[0m")
+					lastFg = ColorDefault()
+					lastBg = ColorDefault()
+				} else {
+					builder.WriteString(getStyleANSI(cell.Style))
 				}
-
 				lastStyle = cell.Style
 			}
 
@@ -154,4 +140,18 @@ func (b *Buffer) Flush() string {
 	}
 	builder.WriteString("\033[0m")
 	return builder.String()
+}
+
+func getStyleANSI(style TextStyle) string {
+    switch style {
+    case TextStyleBold:          return "\033[1m"
+    case TextStyleDim:           return "\033[2m"
+    case TextStyleItalic:        return "\033[3m"
+    case TextStyleUnderline:     return "\033[4m"
+    case TextStyleBlink:         return "\033[5m"
+    case TextStyleReverse:       return "\033[7m"
+    case TextStyleHidden:        return "\033[8m"
+    case TextStyleStrikethrough: return "\033[9m"
+    default:                     return ""
+    }
 }
