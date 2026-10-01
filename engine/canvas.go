@@ -64,6 +64,10 @@ func (c *Canvas) SetRune(x, y int, rune rune) {
 }
 
 func (c *Canvas) DrawString(x, y int, s string, fgColor Color) {
+	c.DrawStringStyled(x, y, s, fgColor, TextStyleDefault)
+}
+
+func (c *Canvas) DrawStringStyled(x, y int, s string, fgColor Color, style TextStyle) {
 	r := []rune(s)
 
 	for i, ch := range r {
@@ -75,7 +79,10 @@ func (c *Canvas) DrawString(x, y int, s string, fgColor Color) {
 			bgColor = c.buffer.Data[globalY][globalX].BgColor
 		}
 
-		c.SetCell(x+i, y, NewCellColored(ch, fgColor, bgColor))
+		cell := NewCellColored(ch, fgColor, bgColor)
+		cell.Style = style
+
+		c.SetCell(x+i, y, cell)
 	}
 }
 
