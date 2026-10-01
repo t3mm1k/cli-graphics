@@ -202,8 +202,7 @@ func (a *App) handleKey(key string) {
 
 	if focusable, ok := a.root.(Focusable); ok {
 		if !focusable.HandleKey(key) {
-			handler, exists := a.shortcuts[key]
-			if exists {
+			if handler, exists := a.shortcuts[key]; exists && handler != nil {
 				handler()
 			}
 		}
