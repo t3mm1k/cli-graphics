@@ -100,3 +100,11 @@ func (c *Canvas) DrawRect(x, y, w, h int, borderStyle ...BorderStyle) { //TODO Ð
 	c.SetCell(x, y+h-1, bl)
 	c.SetCell(x+w-1, y+h-1, br)
 }
+
+func (c *Canvas) Fill(x, y, w, h int, cell Cell) {
+	for row := y; row < y+h; row++ {
+		for col := x; col < x+w; col++ {
+			c.SetCell(col, row, cell)
+		}
+	}
+}
