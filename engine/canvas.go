@@ -46,6 +46,16 @@ func (c *Canvas) SetCell(x, y int, cell Cell) {
 		return
 	}
 
+	existing := c.buffer.Data[globalY][globalX]
+
+	if cell.FgColor.IsDefault {
+		cell.FgColor = existing.FgColor
+	}
+
+	if cell.BgColor.IsDefault {
+		cell.BgColor = existing.BgColor
+	}
+
 	c.buffer.Data[globalY][globalX] = cell
 }
 
