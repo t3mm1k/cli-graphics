@@ -53,11 +53,19 @@ func (c *Canvas) SetRune(x, y int, rune rune) {
 	c.SetCell(x, y, NewCell(rune))
 }
 
-func (c *Canvas) DrawString(x, y int, s string) {
+func (c *Canvas) DrawString(x, y int, s string, fgColor Color) {
 	r := []rune(s)
 
-	for i, cell := range r {
-		c.SetCell(x+i, y, NewCellColored(cell, ColorNeonCyan, ColorDefault())) //TODO Сделать СТИЛИ ДЛЯ СТРОК!!!
+	for i, ch := range r {
+		globalX := c.offsetX + x + i
+		globalY := c.offsetY + y
+
+		bgColor := ColorDefault()
+		if globalX >= 0 && globalX < c.buffer.W && globalY >= 0 && globalY < c.buffer.H {
+			bgColor = c.buffer.Data[globalY][globalX].BgColor
+		}
+
+		c.SetCell(x+i, y, NewCellColored(ch, fgColor, bgColor))
 	}
 }
 
