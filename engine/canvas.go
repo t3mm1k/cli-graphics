@@ -8,6 +8,14 @@ const (
 	BorderRounded BorderStyle = "rounded"
 )
 
+type TextAlign uint8
+
+const (
+	TextAlignLeft TextAlign = iota
+	TextAlignCenter
+	TextAlignRight
+)
+
 type Canvas struct {
 	buffer  *Buffer
 	offsetX int
@@ -68,10 +76,25 @@ func (c *Canvas) DrawString(x, y int, s string, fgColor Color) {
 }
 
 func (c *Canvas) DrawStringStyled(x, y int, s string, fgColor Color, style TextStyle) {
+	c.DrawStringAligned(x, y, s, fgColor, style, TextAlignLeft)
+}
+
+func (c *Canvas) DrawStringAligned(x, y int, s string, fgColor Color, style TextStyle, align TextAlign) {
 	r := []rune(s)
 
+	startX := x
+
+	switch align {
+	case TextAlignCenter:
+		startX = x - len(r)/2
+	case TextAlignRight:
+		startX = x - len(r)
+	case TextAlignLeft:
+		startX = x
+	}
+
 	for i, ch := range r {
-		globalX := c.offsetX + x + i
+		globalX := c.offsetX + startX + i
 		globalY := c.offsetY + y
 
 		bgColor := ColorDefault()
@@ -82,7 +105,7 @@ func (c *Canvas) DrawStringStyled(x, y int, s string, fgColor Color, style TextS
 		cell := NewCellColored(ch, fgColor, bgColor)
 		cell.Style = style
 
-		c.SetCell(x+i, y, cell)
+		c.SetCell(startX+i, y, cell)
 	}
 }
 
