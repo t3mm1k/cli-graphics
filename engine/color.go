@@ -15,26 +15,43 @@ func RGBToColor(r, g, b uint8) Color {
 	return Color{r, g, b, false}
 }
 
+type TextStyle uint8
+
+const (
+    TextStyleDefault TextStyle = iota
+    TextStyleBold
+    TextStyleDim
+    TextStyleItalic
+    TextStyleUnderline
+    TextStyleBlink
+    TextStyleReverse
+    TextStyleHidden
+    TextStyleStrikethrough
+)
+
 type Cell struct {
-	R       rune
-	FgColor Color
-	BgColor Color
+    R       rune
+    FgColor Color
+    BgColor Color
+    Style   TextStyle
 }
 
 func NewCell(r rune) Cell {
-	return Cell{
-		R:       r,
-		FgColor: ColorDefault(),
-		BgColor: ColorDefault(),
-	}
+    return Cell{
+        R:       r,
+        FgColor: ColorDefault(),
+        BgColor: ColorDefault(),
+        Style:   TextStyleDefault,
+    }
 }
 
 func NewCellColored(r rune, fg, bg Color) Cell {
-	return Cell{
-		R:       r,
-		FgColor: fg,
-		BgColor: bg,
-	}
+    return Cell{
+        R:       r,
+        FgColor: fg,
+        BgColor: bg,
+        Style:   TextStyleDefault,
+    }
 }
 
 func ToEngineColor(c color.Color) Color {
