@@ -74,15 +74,14 @@ func (b *Buffer) ClearRegion(x, y, w, h int) {
 	}
 }
 
-func (b *Buffer) Flush() {
-	var builder strings.Builder
+func (b *Buffer) Flush() string {
+    var builder strings.Builder
 
-	builder.WriteString("\u001B[H")
+    lastFg := ColorDefault()
+    lastBg := ColorDefault()
+    lastStyle := TextStyleDefault
 
-	lastFg := ColorDefault()
-	lastBg := ColorDefault()
-
-	for y, row := range b.Data {
+    for y, row := range b.Data {
 		for _, cell := range row {
 			if cell.BgColor != lastBg {
 				if cell.BgColor.IsDefault {
@@ -102,6 +101,32 @@ func (b *Buffer) Flush() {
 				lastFg = cell.FgColor
 			}
 
+			if cell.Style != lastStyle {
+				switch cell.Style {
+				case TextStyleDefault:
+					builder.WriteString("\033[0m")
+				case TextStyleBold:
+					builder.WriteString("\033[1m")
+				case TextStyleDim:
+					builder.WriteString("\033[2m")
+				case TextStyleItalic:
+					builder.WriteString("\033[3m")
+				case TextStyleUnderline:
+					builder.WriteString("\033[4m")
+				case TextStyleBlink:
+					builder.WriteString("\033[5m")
+				case TextStyleReverse:
+					builder.WriteString("\033[7m")
+				case TextStyleHidden:
+					builder.WriteString("\033[8m")
+				case TextStyleStrikethrough:
+					builder.WriteString("\033[9m")
+				}
+
+				lastStyle = cell.Style
+			}
+
+
 			builder.WriteRune(cell.R)
 		}
 
@@ -110,5 +135,5 @@ func (b *Buffer) Flush() {
 		}
 	}
 	builder.WriteString("\033[0m")
-	fmt.Print(builder.String())
+	return builder.String()
 }
