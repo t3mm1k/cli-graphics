@@ -74,6 +74,25 @@ func (b *Buffer) ClearRegion(x, y, w, h int) {
 	}
 }
 
+func resetTextStyle(builder *strings.Builder, style TextStyle) {
+	switch style {
+	case TextStyleBold, TextStyleDim:
+		builder.WriteString("\033[22m")
+	case TextStyleItalic:
+		builder.WriteString("\033[23m")
+	case TextStyleUnderline:
+		builder.WriteString("\033[24m")
+	case TextStyleBlink:
+		builder.WriteString("\033[25m")
+	case TextStyleReverse:
+		builder.WriteString("\033[27m")
+	case TextStyleHidden:
+		builder.WriteString("\033[28m")
+	case TextStyleStrikethrough:
+		builder.WriteString("\033[29m")
+	}
+}
+
 func (b *Buffer) Flush() string {
     var builder strings.Builder
 
@@ -102,9 +121,9 @@ func (b *Buffer) Flush() string {
 			}
 
 			if cell.Style != lastStyle {
+				resetTextStyle(&builder, lastStyle)
+
 				switch cell.Style {
-				case TextStyleDefault:
-					builder.WriteString("\033[0m")
 				case TextStyleBold:
 					builder.WriteString("\033[1m")
 				case TextStyleDim:
@@ -125,7 +144,6 @@ func (b *Buffer) Flush() string {
 
 				lastStyle = cell.Style
 			}
-
 
 			builder.WriteRune(cell.R)
 		}
