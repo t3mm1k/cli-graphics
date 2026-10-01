@@ -19,6 +19,8 @@ type Input struct {
 	OnInput func(key string)
 
 	Filter func(key string) bool
+
+	isPassword bool
 }
 
 func (i *Input) SetFocus(focused bool) {
@@ -124,14 +126,20 @@ func (i *Input) Render(canvas *engine.Canvas) {
 		start = i.cursorPos - textW + 1
 	}
 
-	for j := 0; j < textW; j++ {
-		strIndex := start + j
-		if strIndex < len(i.value) {
-			// Передаем белый цвет для вводимого текста
-			cell := engine.NewCellColored(i.value[strIndex], engine.ColorWhite, engine.ColorDefault())
-			canvas.SetCell(1+j, 1, cell)
+		for j := 0; j < textW; j++ {
+			strIndex := start + j
+			if strIndex < len(i.value) {
+				// По умолчанию берем реальный символ
+				charToRender := i.value[strIndex]
+				
+				if i.isPassword {
+					charToRender = '*'
+				}
+
+				cell := engine.NewCellColored(charToRender, engine.ColorDefault(), engine.ColorDefault())
+				canvas.SetCell(1+j, 1, cell)
+			}
 		}
-	}
 
 	if i.IsFocused() && i.cursorIsVisible {
 		visualCursorPos := i.cursorPos - start
@@ -165,4 +173,8 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 	engine.FocusManagerInstance.Register(id)
 
 	return input
+}
+
+func (i *Input) SetPassword(isPassword bool) {
+	i.isPassword = isPassword
 }
