@@ -22,6 +22,28 @@ func main() {
 	app := engine.NewApp(rootScreen)
 	app.SetLogging(true)
 
+	app.AddShortcut("Ctrl+L", func() {
+		go func() {
+			imgURL := "https://avatars.yandex.net/get-music-content/16334817/73d15c0c.a.16218390-2/400x400"
+			resp, err := http.Get(imgURL)
+			if err != nil {
+				return
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				return
+			}
+			img, _, err := image.Decode(resp.Body)
+			if err != nil {
+				return
+			}
+
+			app.Post(func() {
+				picture.SetImage(img)
+			})
+		}()
+	})
+
 	btnImage.OnClick = func() {
 		go func() {
 			imgURL := "https://avatars.yandex.net/get-music-content/16334817/73d15c0c.a.16218390-2/400x400"

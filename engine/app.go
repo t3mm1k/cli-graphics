@@ -18,6 +18,8 @@ type App struct {
 	actions  chan func()
 	tickRate time.Duration
 
+	shortcuts map[string]func()
+
 	running  bool
 	stopOnce sync.Once
 	stopChan chan struct{}
@@ -34,12 +36,13 @@ func NewApp(root Component) *App {
 		panic(err)
 	}
 	return &App{
-		buffer:   buf,
-		root:     root,
-		events:   make(chan Event, 100),
-		tickRate: 500 * time.Millisecond,
-		stopChan: make(chan struct{}),
-		actions:  make(chan func(), 100),
+		buffer:    buf,
+		root:      root,
+		events:    make(chan Event, 100),
+		tickRate:  500 * time.Millisecond,
+		stopChan:  make(chan struct{}),
+		actions:   make(chan func(), 100),
+		shortcuts: make(map[string]func()),
 	}
 }
 
@@ -198,8 +201,17 @@ func (a *App) handleKey(key string) {
 	}
 
 	if focusable, ok := a.root.(Focusable); ok {
-		focusable.HandleKey(key)
+		if !focusable.HandleKey(key) {
+			handler, exists := a.shortcuts[key]
+			if exists {
+				handler()
+			}
+		}
 	}
+}
+
+func (a *App) AddShortcut(shortcut string, handler func()) {
+	a.shortcuts[shortcut] = handler
 }
 
 func (a *App) cleanup() {
