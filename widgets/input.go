@@ -16,6 +16,10 @@ type Input struct {
 
 	cursorPos int
 
+	borderColor engine.Color
+
+	focusColor  engine.Color
+
 	OnInput func(key string)
 
 	Filter func(key string) bool
@@ -104,10 +108,10 @@ func (i *Input) Render(canvas *engine.Canvas) {
 	w, h := i.GetSize()
 
 	borderStyle := engine.BorderSingle
-	borderColor := engine.ColorDimGray
+	borderColor := i.borderColor
 	if i.IsFocused() {
 		borderStyle = engine.BorderDouble
-		borderColor = engine.ColorNeonGreen // Зеленая рамка для активного ввода
+		borderColor = i.focusColor
 	}
 
 	canvas.DrawRect(0, 0, w, h, borderStyle, borderColor, engine.ColorDefault())
@@ -145,7 +149,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 		visualCursorPos := i.cursorPos - start
 		if visualCursorPos >= 0 && visualCursorPos < textW {
 			// Подсвечиваем курсор цветом рамки
-			cursorCell := engine.NewCellColored('_', engine.ColorNeonGreen, engine.ColorDefault())
+			cursorCell := engine.NewCellColored('_', i.focusColor, engine.ColorDefault())
 			canvas.SetCell(1+visualCursorPos, 1, cursorCell)
 		}
 	}
@@ -159,6 +163,8 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 		OnInput:         onInput,
 		cursorIsVisible: false,
 		cursorPos:       0,
+		borderColor: engine.ColorDimGray,
+		focusColor:  engine.ColorNeonGreen,
 		Filter: func(key string) bool {
 			runes := []rune(key)
 			if len(runes) != 1 {
@@ -177,4 +183,9 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 
 func (i *Input) SetPassword(isPassword bool) {
 	i.isPassword = isPassword
+}
+
+func (i *Input) SetColors(normal, focus engine.Color) {
+	i.borderColor = normal
+	i.focusColor = focus
 }
