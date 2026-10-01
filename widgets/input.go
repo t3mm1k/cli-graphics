@@ -106,7 +106,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 		borderStyle = engine.BorderDouble
 	}
 
-	canvas.DrawRect(0, 0, w, h, borderStyle)
+	canvas.DrawRect(0, 0, w, h, borderStyle, engine.ColorDefault(), engine.ColorDefault())
 
 	textW := w - 2
 	if textW <= 0 {
