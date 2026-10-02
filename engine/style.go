@@ -15,6 +15,39 @@ const (
 	BorderBold
 )
 
+func str2bordertype(str string) (BorderType, bool) {
+	switch str {
+	case "border-single":
+		return BorderSingle, true
+	case "border-rounded":
+		return BorderRounded, true
+	case "border-double":
+		return BorderDouble, true
+	case "border-bold":
+		return BorderBold, true
+	case "border-none":
+		return BorderNone, true
+	default:
+		return BorderNone, false
+	}
+}
+func (b BorderType) String() string {
+	switch b {
+	case BorderSingle:
+		return "border-single"
+	case BorderRounded:
+		return "border-rounded"
+	case BorderDouble:
+		return "border-double"
+	case BorderBold:
+		return "border-bold"
+	case BorderNone:
+		return "border-none"
+	default:
+		return ""
+	}
+}
+
 type TextAlign int
 
 const (
@@ -23,12 +56,115 @@ const (
 	TextAlignRight
 )
 
+func str2align(str string) (TextAlign, bool) {
+	switch str {
+	case "text-left":
+		return TextAlignLeft, true
+	case "text-right":
+		return TextAlignRight, true
+	case "text-center":
+		return TextAlignCenter, true
+	default:
+		return TextAlignCenter, false
+	}
+}
+func (b TextAlign) String() string {
+	switch b {
+	case TextAlignLeft:
+		return "text-left"
+	case TextAlignRight:
+		return "text-right"
+	case TextAlignCenter:
+		return "text-center"
+	default:
+		return ""
+	}
+}
+
 type TextOverflow int
 
 const (
 	OverflowClip TextOverflow = iota
 	OverflowTruncate
 )
+
+func str2overflow(str string) (TextOverflow, bool) {
+	switch str {
+	case "truncate":
+		return OverflowTruncate, true
+	case "clip":
+		return OverflowClip, true
+	default:
+		return OverflowClip, false
+	}
+}
+func (b TextOverflow) String() string {
+	switch b {
+	case OverflowTruncate:
+		return "truncate"
+	default:
+		return "clip"
+	}
+}
+
+type TextStyle uint8
+
+const (
+	TextStyleDefault TextStyle = iota
+	TextStyleBold
+	TextStyleDim
+	TextStyleItalic
+	TextStyleUnderline
+	TextStyleBlink
+	TextStyleReverse
+	TextStyleHidden
+	TextStyleStrikethrough
+)
+
+func str2textstyle(str string) (TextStyle, bool) {
+	switch str {
+	case "bold":
+		return TextStyleBold, true
+	case "dim":
+		return TextStyleDim, true
+	case "italic":
+		return TextStyleItalic, true
+	case "underline":
+		return TextStyleUnderline, true
+	case "blink":
+		return TextStyleBlink, true
+	case "reverse":
+		return TextStyleReverse, true
+	case "hidden":
+		return TextStyleHidden, true
+	case "strikethrough":
+		return TextStyleStrikethrough, true
+	default:
+		return TextStyleDefault, false
+	}
+}
+func (b TextStyle) String() string {
+	switch b {
+	case TextStyleBold:
+		return "bold"
+	case TextStyleDim:
+		return "dim"
+	case TextStyleItalic:
+		return "italic"
+	case TextStyleUnderline:
+		return "underline"
+	case TextStyleBlink:
+		return "blink"
+	case TextStyleReverse:
+		return "reverse"
+	case TextStyleHidden:
+		return "hidden"
+	case TextStyleStrikethrough:
+		return "strikethrough"
+	default:
+		return ""
+	}
+}
 
 type Padding struct {
 	Top    int
