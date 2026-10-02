@@ -1,21 +1,5 @@
 package engine
 
-type BorderStyle string
-
-const (
-	BorderSingle  BorderStyle = "single"
-	BorderDouble  BorderStyle = "double"
-	BorderRounded BorderStyle = "rounded"
-)
-
-type TextAlign uint8
-
-const (
-	TextAlignLeft TextAlign = iota
-	TextAlignCenter
-	TextAlignRight
-)
-
 type Canvas struct {
 	buffer  *Buffer
 	offsetX int
@@ -109,7 +93,7 @@ func (c *Canvas) DrawStringAligned(x, y int, s string, fgColor Color, style Text
 	}
 }
 
-func (c *Canvas) DrawRect(x, y, w, h int, borderStyle BorderStyle, borderColor Color, bgColor Color) {
+func (c *Canvas) DrawRect(x, y, w, h int, borderStyle BorderType, borderColor Color, bgColor Color) {
 	if w < 2 || h < 2 {
 		return
 	}
