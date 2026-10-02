@@ -241,6 +241,40 @@ type Style struct {
 	Overflow TextOverflow
 }
 
+func parseColorRule(s *Style, str string) bool {
+	var prefix string
+	switch {
+	case strings.HasPrefix(str, "bg:"):
+		prefix = "bg-"
+	case strings.HasPrefix(str, "fg:"):
+		prefix = "fg-"
+	case strings.HasPrefix(str, "border:"):
+		prefix = "bg-"
+	case strings.HasPrefix(str, "border-bg:"):
+		prefix = "fg-"
+	default:
+		return false
+	}
+
+	val := strings.TrimPrefix(str, prefix)
+	if color, ok := ParseColor(val); ok {
+		switch prefix {
+		case "bg-":
+			s.Bg = color
+		case "fg-":
+			s.Fg = color
+		case "border-":
+			s.BorderFg = color
+		case "border-bg":
+			s.BorderBg = color
+		default:
+			return false
+		}
+		return true
+	}
+	return false
+}
+
 func DefaultStyle() Style {
 	return Style{
 		Fg:        ColorDefault(),
@@ -282,4 +316,20 @@ func ParseColor(val string) (Color, bool) {
 	}
 
 	return ColorDefault(), false
+}
+
+func applyRule(s *Style, rule string) {
+	if border, ok := str2bordertype(rule); ok {
+		s.Border = border
+	}
+	if align, ok := str2align(rule); ok {
+		s.Align = align
+	}
+	if overflow, ok := str2overflow(rule); ok {
+		s.Overflow = overflow
+	}
+
+	parsePadding(s, rule)
+	parseColorRule(s, rule)
+	// TODO Переписать функции, привести к одному виду
 }
