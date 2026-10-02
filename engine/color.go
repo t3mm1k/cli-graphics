@@ -15,43 +15,29 @@ func RGBToColor(r, g, b uint8) Color {
 	return Color{r, g, b, false}
 }
 
-type TextStyle uint8
-
-const (
-    TextStyleDefault TextStyle = iota
-    TextStyleBold
-    TextStyleDim
-    TextStyleItalic
-    TextStyleUnderline
-    TextStyleBlink
-    TextStyleReverse
-    TextStyleHidden
-    TextStyleStrikethrough
-)
-
 type Cell struct {
-    R       rune
-    FgColor Color
-    BgColor Color
-    Style   TextStyle
+	R       rune
+	FgColor Color
+	BgColor Color
+	Style   TextStyle
 }
 
 func NewCell(r rune) Cell {
-    return Cell{
-        R:       r,
-        FgColor: ColorDefault(),
-        BgColor: ColorDefault(),
-        Style:   TextStyleDefault,
-    }
+	return Cell{
+		R:       r,
+		FgColor: ColorDefault(),
+		BgColor: ColorDefault(),
+		Style:   TextStyleDefault,
+	}
 }
 
 func NewCellColored(r rune, fg, bg Color) Cell {
-    return Cell{
-        R:       r,
-        FgColor: fg,
-        BgColor: bg,
-        Style:   TextStyleDefault,
-    }
+	return Cell{
+		R:       r,
+		FgColor: fg,
+		BgColor: bg,
+		Style:   TextStyleDefault,
+	}
 }
 
 func ToEngineColor(c color.Color) Color {
@@ -97,15 +83,15 @@ var BaseColors = ColorRegistry{
 		// ==========================================
 		// 2. Красные и винные оттенки
 		// ==========================================
-		"red":       {R: 255, G: 0, B: 0, IsDefault: false},
-		"crimson":   {R: 220, G: 20, B: 60, IsDefault: false},
-		"scarlet":   {R: 255, G: 36, B: 0, IsDefault: false},
-		"ruby":      {R: 224, G: 17, B: 95, IsDefault: false},
-		"maroon":    {R: 128, G: 0, B: 0, IsDefault: false},
-		"burgundy":  {R: 144, G: 0, B: 32, IsDefault: false},
-		"wine":      {R: 114, G: 47, B: 55, IsDefault: false},
-		"brick":     {R: 178, G: 34, B: 34, IsDefault: false},
-		"cherry":    {R: 222, G: 49, B: 99, IsDefault: false},
+		"red":      {R: 255, G: 0, B: 0, IsDefault: false},
+		"crimson":  {R: 220, G: 20, B: 60, IsDefault: false},
+		"scarlet":  {R: 255, G: 36, B: 0, IsDefault: false},
+		"ruby":     {R: 224, G: 17, B: 95, IsDefault: false},
+		"maroon":   {R: 128, G: 0, B: 0, IsDefault: false},
+		"burgundy": {R: 144, G: 0, B: 32, IsDefault: false},
+		"wine":     {R: 114, G: 47, B: 55, IsDefault: false},
+		"brick":    {R: 178, G: 34, B: 34, IsDefault: false},
+		"cherry":   {R: 222, G: 49, B: 99, IsDefault: false},
 		// ==========================================
 		// 3. Оранжевые, коричневые и земляные
 		// ==========================================
