@@ -173,6 +173,60 @@ type Padding struct {
 	Left   int
 }
 
+func parsePadding(s *Style, str string) bool {
+
+	var prefix string
+	switch {
+	case strings.HasPrefix(str, "px-"):
+		prefix = "px-"
+	case strings.HasPrefix(str, "py-"):
+		prefix = "py-"
+	case strings.HasPrefix(str, "pt-"):
+		prefix = "pt-"
+	case strings.HasPrefix(str, "pb-"):
+		prefix = "pb-"
+	case strings.HasPrefix(str, "pl-"):
+		prefix = "pl-"
+	case strings.HasPrefix(str, "pr-"):
+		prefix = "pr-"
+	case strings.HasPrefix(str, "p-"):
+		prefix = "p-"
+	default:
+		return false
+	}
+
+	valStr := strings.TrimPrefix(str, prefix)
+	val, err := strconv.Atoi(valStr)
+	if err != nil || val < 0 {
+		return false
+	}
+
+	switch prefix {
+	case "p-":
+		s.Padding.Top = val
+		s.Padding.Right = val
+		s.Padding.Bottom = val
+		s.Padding.Left = val
+	case "px-":
+		s.Padding.Left = val
+		s.Padding.Right = val
+	case "py-":
+		s.Padding.Top = val
+		s.Padding.Bottom = val
+	case "pt-":
+		s.Padding.Top = val
+	case "pb-":
+		s.Padding.Bottom = val
+	case "pl-":
+		s.Padding.Left = val
+	case "pr-":
+		s.Padding.Right = val
+	}
+
+	return true
+
+}
+
 type Style struct {
 	Fg        Color
 	Bg        Color
