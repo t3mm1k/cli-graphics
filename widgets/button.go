@@ -88,3 +88,13 @@ func (b *Button) SetColors(normal, focus engine.Color) {
 	b.Style.BorderFg = normal
 	b.FocusedStyle.BorderFg = focus
 }
+
+func (b *Button) HandleMouse(e *engine.MouseEvent) bool {
+	if e.MouseButton == utils.MouseBtnLeft {
+		if b.OnClick != nil {
+			b.OnClick()
+		}
+		return true
+	}
+	return false
+}

@@ -91,7 +91,7 @@ func (a *App) Run() error {
 	}()
 	defer setupTerminal()()
 
-	fmt.Print("\u001B[?1049h\u001B[?25l\u001B[?7l\033[?1000h\033[?1002h\033[?1006h")
+	fmt.Print("\u001B[?1049h\u001B[?25l\u001B[?7l\033[?1000h\033[?1003h\033[?1006h")
 
 	go a.listenKeys()
 	go a.listenResize()
@@ -123,7 +123,7 @@ func (a *App) Run() error {
 			case *MouseEvent:
 				Log.Debug("app: mouse event", "event", e)
 				a.handleMouse(e)
-				a.draw()
+				//a.draw()
 
 			case *TerminalResizeEvent:
 				a.buffer.SetSize(e.Width, e.Height)
@@ -236,8 +236,7 @@ func (a *App) cleanup() {
 		_ = term.Restore(int(os.Stdin.Fd()), a.oldTermState)
 	}
 
-	fmt.Print("\u001B[?7h\u001B[?25h\u001B[?1049l\033[?1006l\033[?1002l\033[?1000l")
-	fmt.Print("\033[?1006l\033[?1002l\033[?1000l")
+	fmt.Print("\u001B[?7h\u001B[?25h\u001B[?1049l\033[?1006l\033[?1003l\033[?1000l")
 
 	if a.logFile != nil {
 		_ = a.logFile.Close()
@@ -271,25 +270,32 @@ func (a *App) handleMouse(event *MouseEvent) {
 		switch event.MouseAction {
 		case utils.MouseActionMove:
 			if target != a.hoveredComp {
-				a.hoveredComp.SetHovered(false)
+				if a.hoveredComp != nil {
+					a.hoveredComp.SetHovered(false)
+				}
 				target.SetHovered(true)
+
 				a.hoveredComp = target
+				a.draw()
 			}
 		case utils.MouseActionPress:
-			if target != a.pressedComp {
-				a.pressedComp.SetHovered(false)
-				target.SetHovered(true)
+			if event.MouseButton == utils.MouseBtnLeft {
+				target.SetActive(true)
 				a.pressedComp = target
+				FocusManagerInstance.SetFocused(target.GetId())
 			}
+			a.draw()
 		case utils.MouseActionRelease:
 			if a.pressedComp != nil {
-				a.pressedComp.SetHovered(false)
+				a.pressedComp.SetActive(false)
 				if target == a.pressedComp {
 					if handler, ok := target.(MouseHandler); ok {
 						handler.HandleMouse(event)
 					}
 				}
+				a.pressedComp = nil
 			}
+			a.draw()
 		}
 
 	}
