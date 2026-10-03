@@ -21,11 +21,14 @@ func NewList(w, h, x, y int, lines []string, classes ...string) *ListView {
 	list := &ListView{
 		BaseComponent: engine.NewBaseComponent(id, x, y, w, h),
 		lines:         lines,
+		selectedIndex: 0,
+		focused:       false,
 	}
 
 	list.InitStyle(DefaultListViewClasses, classes...)
 
 	engine.Registry.AddComponent(list)
+	engine.FocusManagerInstance.Register(id)
 
 	return list
 }
