@@ -84,11 +84,23 @@ func (l *ListView) Render(canvas *engine.Canvas) {
 			break
 		}
 
-		source := "• " + line
 		textX := offset + style.Padding.Left
 		textY := offset + style.Padding.Top + i
 
-		canvas.DrawStringAligned(textX, textY, source, style.Fg, style.TextStyle, style.Align)
+		marker := "• "
+		currentLineStyle := style
+
+		if i == l.selectedIndex {
+			marker = "▶ "
+			if l.IsFocused() {
+				currentLineStyle = l.SelectedStyle
+			} else {
+				currentLineStyle = l.FocusedStyle
+			}
+		}
+
+		source := marker + line
+		canvas.DrawStringAligned(textX, textY, source, currentLineStyle.Fg, currentLineStyle.TextStyle, currentLineStyle.Align)
 	}
 }
 
