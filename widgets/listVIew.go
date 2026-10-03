@@ -41,6 +41,31 @@ func (l *ListView) IsFocused() bool {
 	return engine.FocusManagerInstance.GetFocused() == l.GetId()
 }
 
+func (l *ListView) HandleKey(key string) bool {
+	if len(l.lines) == 0 {
+		return false
+	}
+
+	switch key {
+	case "Down", "ArrowDown":
+		if l.selectedIndex < len(l.lines)-1 {
+			l.selectedIndex++
+		} else {
+			l.selectedIndex = 0 // зацикливание вниз
+		}
+		return true
+
+	case "Up", "ArrowUp":
+		if l.selectedIndex > 0 {
+			l.selectedIndex--
+		} else {
+			l.selectedIndex = len(l.lines) - 1 // зацикливание вверх
+		}
+		return true
+	}
+
+	return false
+}
 
 func (l *ListView) Render(canvas *engine.Canvas) {
 	style := l.CurrentStyle()
