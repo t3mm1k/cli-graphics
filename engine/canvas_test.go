@@ -11,7 +11,8 @@ func TestCanvas_SetCell(t *testing.T) {
 	buf, err := NewBuffer(10, 10)
 	require.NoError(t, err)
 	canvas := NewCanvas(buf)
-
+	ColorRed, _ := BaseColors.Get("red")
+	ColorGreen, _ := BaseColors.Get("green")
 	testCell := NewCellColored('Z', ColorRed, ColorGreen)
 
 	tests := []struct {
@@ -170,6 +171,7 @@ func TestCanvas_SubCanvas(t *testing.T) {
 			}
 
 			if tt.shouldDrawCell {
+				ColorRed, _ := BaseColors.Get("red")
 				cell := NewCellColored('M', ColorRed, ColorDefault())
 				sub.SetCell(tt.drawLocalX, tt.drawLocalY, cell)
 				assert.Equal(t, cell, buf.Data[tt.wantGlobalY][tt.wantGlobalX])
@@ -252,20 +254,20 @@ func TestCanvas_DrawRect(t *testing.T) {
 	tests := []struct {
 		name       string
 		x, y, w, h int
-		style      BorderStyle
+		style      BorderType
 		verify     func(t *testing.T, b *Buffer)
 	}{
 		{
-			name:       "ignores dimensions smaller than 2",
-			x: 0, y: 0, w: 1, h: 5,
+			name: "ignores dimensions smaller than 2",
+			x:    0, y: 0, w: 1, h: 5,
 			style: BorderSingle,
 			verify: func(t *testing.T, b *Buffer) {
 				assert.Equal(t, NewCell(' '), b.Data[0][0])
 			},
 		},
 		{
-			name:       "draws single border correctly",
-			x: 1, y: 1, w: 4, h: 3,
+			name: "draws single border correctly",
+			x:    1, y: 1, w: 4, h: 3,
 			style: BorderSingle,
 			verify: func(t *testing.T, b *Buffer) {
 				// Углы
@@ -279,8 +281,8 @@ func TestCanvas_DrawRect(t *testing.T) {
 			},
 		},
 		{
-			name:       "draws rounded border",
-			x: 0, y: 0, w: 3, h: 3,
+			name: "draws rounded border",
+			x:    0, y: 0, w: 3, h: 3,
 			style: BorderRounded,
 			verify: func(t *testing.T, b *Buffer) {
 				assert.Equal(t, '╭', b.Data[0][0].R)
@@ -288,8 +290,8 @@ func TestCanvas_DrawRect(t *testing.T) {
 			},
 		},
 		{
-			name:       "draws double border",
-			x: 0, y: 0, w: 3, h: 3,
+			name: "draws double border",
+			x:    0, y: 0, w: 3, h: 3,
 			style: BorderDouble,
 			verify: func(t *testing.T, b *Buffer) {
 				assert.Equal(t, '╔', b.Data[0][0].R)

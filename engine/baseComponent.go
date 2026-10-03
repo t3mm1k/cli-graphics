@@ -6,6 +6,16 @@ type BaseComponent struct {
 	id   uuid.UUID
 	x, y int
 	w, h int
+
+	Style         Style
+	FocusedStyle  Style
+	DisabledStyle Style
+	ActiveStyle   Style
+	SelectedStyle Style
+
+	isDisabled bool
+	isActive   bool
+	isSelected bool
 }
 
 func NewBaseComponent(id uuid.UUID, x, y, w, h int) BaseComponent {
@@ -40,3 +50,35 @@ func (b *BaseComponent) GetId() uuid.UUID {
 func (b *BaseComponent) GetCoords() (x, y int) {
 	return b.x, b.y
 }
+
+func (b *BaseComponent) InitStyle(defaultClasses string, classes ...string) {
+	allClasses := make([]string, 0, 1+len(classes))
+	if defaultClasses != "" {
+		allClasses = append(allClasses, defaultClasses)
+	}
+	allClasses = append(allClasses, classes...)
+	b.Style, b.FocusedStyle, b.DisabledStyle, b.ActiveStyle, b.SelectedStyle = ParseStyles(DefaultStyle(), allClasses)
+}
+
+func (b *BaseComponent) CurrentStyle() Style {
+	if b.isDisabled {
+		return b.DisabledStyle
+	}
+	if b.isActive {
+		return b.ActiveStyle
+	}
+	if FocusManagerInstance != nil && FocusManagerInstance.GetFocused() == b.id {
+		return b.FocusedStyle
+	}
+	if b.isSelected {
+		return b.SelectedStyle
+	}
+	return b.Style
+}
+
+func (b *BaseComponent) SetDisabled(disabled bool) { b.isDisabled = disabled }
+func (b *BaseComponent) IsDisabled() bool          { return b.isDisabled }
+func (b *BaseComponent) SetActive(active bool)     { b.isActive = active }
+func (b *BaseComponent) IsActive() bool            { return b.isActive }
+func (b *BaseComponent) SetSelected(selected bool) { b.isSelected = selected }
+func (b *BaseComponent) IsSelected() bool          { return b.isSelected }

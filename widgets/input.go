@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const DefaultInputClasses = "border-single border:dim-gray fg:white focus:border-double disabled:dim"
+
 type Input struct {
 	engine.BaseComponent
 
@@ -15,10 +17,6 @@ type Input struct {
 	cursorIsVisible bool
 
 	cursorPos int
-
-	borderColor engine.Color
-
-	focusColor  engine.Color
 
 	OnInput func(key string)
 
@@ -106,15 +104,9 @@ func (i *Input) OnTick() {
 
 func (i *Input) Render(canvas *engine.Canvas) {
 	w, h := i.GetSize()
+	style := i.CurrentStyle()
 
-	borderStyle := engine.BorderSingle
-	borderColor := i.borderColor
-	if i.IsFocused() {
-		borderStyle = engine.BorderDouble
-		borderColor = i.focusColor
-	}
-
-	canvas.DrawRect(0, 0, w, h, borderStyle, borderColor, engine.ColorDefault())
+	canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
 
 	textW := w - 2
 	if textW <= 0 {
@@ -122,7 +114,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 	}
 
 	for col := 0; col < textW; col++ {
-		canvas.SetRune(1+col, 1, ' ')
+		canvas.SetCell(1+col, 1, engine.NewCellColored(' ', style.Fg, style.Bg))
 	}
 
 	start := 0
@@ -130,41 +122,40 @@ func (i *Input) Render(canvas *engine.Canvas) {
 		start = i.cursorPos - textW + 1
 	}
 
-		for j := 0; j < textW; j++ {
-			strIndex := start + j
-			if strIndex < len(i.value) {
-				// По умолчанию берем реальный символ
-				charToRender := i.value[strIndex]
-				
-				if i.isPassword {
-					charToRender = '*'
-				}
-
-				cell := engine.NewCellColored(charToRender, engine.ColorDefault(), engine.ColorDefault())
-				canvas.SetCell(1+j, 1, cell)
+	for j := 0; j < textW; j++ {
+		strIndex := start + j
+		if strIndex < len(i.value) {
+			charToRender := i.value[strIndex]
+			if i.isPassword {
+				charToRender = '*'
 			}
+
+			cell := engine.NewCellColored(charToRender, style.Fg, style.Bg)
+			cell.Style = style.TextStyle
+			canvas.SetCell(1+j, 1, cell)
 		}
+	}
 
 	if i.IsFocused() && i.cursorIsVisible {
 		visualCursorPos := i.cursorPos - start
 		if visualCursorPos >= 0 && visualCursorPos < textW {
-			// Подсвечиваем курсор цветом рамки
-			cursorCell := engine.NewCellColored('_', i.focusColor, engine.ColorDefault())
+			cursorColor := style.BorderFg
+			if cursorColor.IsDefault {
+				cursorColor = engine.ColorDefault()
+			}
+			cursorCell := engine.NewCellColored('_', cursorColor, style.Bg)
 			canvas.SetCell(1+visualCursorPos, 1, cursorCell)
 		}
 	}
 }
 
-
-func NewInput(x, y, w int, onInput func(key string)) *Input {
+func NewInput(x, y, w int, onInput func(key string), classes ...string) *Input {
 	id := uuid.New()
 	input := &Input{
 		BaseComponent:   engine.NewBaseComponent(id, x, y, w, 3),
 		OnInput:         onInput,
 		cursorIsVisible: false,
 		cursorPos:       0,
-		borderColor: engine.ColorDimGray,
-		focusColor:  engine.ColorNeonGreen,
 		Filter: func(key string) bool {
 			runes := []rune(key)
 			if len(runes) != 1 {
@@ -174,6 +165,8 @@ func NewInput(x, y, w int, onInput func(key string)) *Input {
 			return unicode.IsLetter(r) || unicode.IsDigit(r) || unicode.IsPunct(r) || unicode.IsSymbol(r) || r == ' '
 		},
 	}
+
+	input.InitStyle(DefaultInputClasses, classes...)
 
 	engine.Registry.AddComponent(input)
 	engine.FocusManagerInstance.Register(id)
@@ -186,6 +179,6 @@ func (i *Input) SetPassword(isPassword bool) {
 }
 
 func (i *Input) SetColors(normal, focus engine.Color) {
-	i.borderColor = normal
-	i.focusColor = focus
+	i.Style.BorderFg = normal
+	i.FocusedStyle.BorderFg = focus
 }

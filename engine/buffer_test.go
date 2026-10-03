@@ -27,6 +27,8 @@ func TestBuffer_Clear(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b, _ := NewBuffer(tt.fields.W, tt.fields.H)
+			ColorBlue, _ := BaseColors.Get("blue")
+			ColorGreen, _ := BaseColors.Get("green")
 			b.Data[2][2] = NewCellColored('x', ColorBlue, ColorGreen)
 			b.Clear()
 			assert.Equal(t, b.Data[2][2], NewCell(' '))

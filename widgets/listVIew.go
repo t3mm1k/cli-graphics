@@ -6,18 +6,22 @@ import (
 	"github.com/google/uuid"
 )
 
+const DefaultListViewClasses = "border-single border:dim-gray fg:default text-left"
+
 type ListView struct {
 	engine.BaseComponent
 
 	lines []string
 }
 
-func NewList(w, h, x, y int, lines []string) *ListView {
+func NewList(w, h, x, y int, lines []string, classes ...string) *ListView {
 	id := uuid.New()
 	list := &ListView{
 		BaseComponent: engine.NewBaseComponent(id, x, y, w, h),
 		lines:         lines,
 	}
+
+	list.InitStyle(DefaultListViewClasses, classes...)
 
 	engine.Registry.AddComponent(list)
 
@@ -25,18 +29,27 @@ func NewList(w, h, x, y int, lines []string) *ListView {
 }
 
 func (l *ListView) Render(canvas *engine.Canvas) {
+	style := l.CurrentStyle()
+	w, h := l.GetSize()
 
-	_, h := l.GetSize()
+	offset := 0
+	if style.Border != engine.BorderNone {
+		canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
+		offset = 1
+	}
 
 	for i, line := range l.lines {
-		if i >= h-2 {
+		if offset > 0 && i >= h-2 {
+			break
+		} else if offset == 0 && i >= h {
 			break
 		}
 
 		source := "• " + line
+		textX := offset + style.Padding.Left
+		textY := offset + style.Padding.Top + i
 
-		canvas.DrawString(1, i+1, source, engine.ColorDefault())
-		//l.Print()
+		canvas.DrawStringAligned(textX, textY, source, style.Fg, style.TextStyle, style.Align)
 	}
 }
 
