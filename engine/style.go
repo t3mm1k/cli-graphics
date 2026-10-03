@@ -328,6 +328,9 @@ func applyRule(s *Style, rule string) {
 	if overflow, ok := str2overflow(rule); ok {
 		s.Overflow = overflow
 	}
+	if textStyle, ok := str2textstyle(rule); ok {
+		s.TextStyle = textStyle
+	}
 
 	parsePadding(s, rule)
 	parseColorRule(s, rule)
