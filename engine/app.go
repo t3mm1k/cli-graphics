@@ -117,6 +117,8 @@ func (a *App) Run() error {
 				}
 				a.handleKey(e.Key)
 				a.draw()
+			case *MouseEvent:
+				Log.Debug("app: mouse event", "event", e)
 
 			case *TerminalResizeEvent:
 				a.buffer.SetSize(e.Width, e.Height)
@@ -183,7 +185,6 @@ func (a *App) listenKeys() {
 				case <-a.stopChan:
 					return
 				case a.events <- &MouseEvent{X: mouse.X, Y: mouse.Y, MouseButton: mouse.Button, MouseAction: mouse.Action}:
-					return
 				}
 			}
 		} else {
