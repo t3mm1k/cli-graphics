@@ -12,10 +12,12 @@ type BaseComponent struct {
 	DisabledStyle Style
 	ActiveStyle   Style
 	SelectedStyle Style
+	HoverStyle    Style
 
 	isDisabled bool
 	isActive   bool
 	isSelected bool
+	isHovered  bool
 }
 
 func NewBaseComponent(id uuid.UUID, x, y, w, h int) BaseComponent {
@@ -57,7 +59,7 @@ func (b *BaseComponent) InitStyle(defaultClasses string, classes ...string) {
 		allClasses = append(allClasses, defaultClasses)
 	}
 	allClasses = append(allClasses, classes...)
-	b.Style, b.FocusedStyle, b.DisabledStyle, b.ActiveStyle, b.SelectedStyle = ParseStyles(DefaultStyle(), allClasses)
+	b.Style, b.FocusedStyle, b.DisabledStyle, b.ActiveStyle, b.SelectedStyle, b.HoverStyle = ParseStyles(DefaultStyle(), allClasses)
 }
 
 func (b *BaseComponent) CurrentStyle() Style {
@@ -66,6 +68,9 @@ func (b *BaseComponent) CurrentStyle() Style {
 	}
 	if b.isActive {
 		return b.ActiveStyle
+	}
+	if b.isHovered {
+		return b.HoverStyle
 	}
 	if FocusManagerInstance != nil && FocusManagerInstance.GetFocused() == b.id {
 		return b.FocusedStyle
@@ -82,3 +87,5 @@ func (b *BaseComponent) SetActive(active bool)     { b.isActive = active }
 func (b *BaseComponent) IsActive() bool            { return b.isActive }
 func (b *BaseComponent) SetSelected(selected bool) { b.isSelected = selected }
 func (b *BaseComponent) IsSelected() bool          { return b.isSelected }
+func (b *BaseComponent) SetHovered(hovered bool)   { b.isHovered = hovered }
+func (b *BaseComponent) IsHovered() bool           { return b.isHovered }

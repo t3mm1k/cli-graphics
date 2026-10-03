@@ -137,6 +137,7 @@ func TestParseStyles(t *testing.T) {
 		wantDisabled Style
 		wantActive   Style
 		wantSelected Style
+		wantHover    Style
 	}{
 		{
 			name: "empty classes returns base for all states",
@@ -149,6 +150,7 @@ func TestParseStyles(t *testing.T) {
 			wantDisabled: DefaultStyle(),
 			wantActive:   DefaultStyle(),
 			wantSelected: DefaultStyle(),
+			wantHover:    DefaultStyle(),
 		},
 		{
 			name: "basic classes applied and inherited by all states",
@@ -211,12 +213,23 @@ func TestParseStyles(t *testing.T) {
 				Align:     TextAlignLeft,
 				Overflow:  OverflowClip,
 			},
+			wantHover: Style{
+				Fg:        Color{R: 255, G: 255, B: 0, IsDefault: false},
+				Bg:        ColorDefault(),
+				TextStyle: TextStyleDefault,
+				Border:    BorderRounded,
+				BorderFg:  ColorDefault(),
+				BorderBg:  ColorDefault(),
+				Padding:   Padding{Left: 2, Right: 2},
+				Align:     TextAlignLeft,
+				Overflow:  OverflowClip,
+			},
 		},
 		{
-			name: "state overrides: focus, disabled, active, selected",
+			name: "state overrides: focus, disabled, active, selected, hover",
 			args: args{
 				base:    DefaultStyle(),
-				classes: []string{"fg:white border-single focus:border:yellow focus:bold disabled:dim active:bg:blue selected:underline"},
+				classes: []string{"fg:white border-single focus:border:yellow focus:bold disabled:dim active:bg:blue selected:underline hover:border:red hover:italic"},
 			},
 			wantNormal: Style{
 				Fg:        Color{R: 255, G: 255, B: 255, IsDefault: false},
@@ -273,16 +286,28 @@ func TestParseStyles(t *testing.T) {
 				Align:     TextAlignLeft,
 				Overflow:  OverflowClip,
 			},
+			wantHover: Style{
+				Fg:        Color{R: 255, G: 255, B: 255, IsDefault: false},
+				Bg:        ColorDefault(),
+				TextStyle: TextStyleItalic,
+				Border:    BorderSingle,
+				BorderFg:  Color{R: 255, G: 0, B: 0, IsDefault: false},
+				BorderBg:  ColorDefault(),
+				Padding:   Padding{},
+				Align:     TextAlignLeft,
+				Overflow:  OverflowClip,
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotNormal, gotFocus, gotDisabled, gotActive, gotSelected := ParseStyles(tt.args.base, tt.args.classes)
+			gotNormal, gotFocus, gotDisabled, gotActive, gotSelected, gotHover := ParseStyles(tt.args.base, tt.args.classes)
 			assert.Equalf(t, tt.wantNormal, gotNormal, "ParseStyles(%v, %v)", tt.args.base, tt.args.classes)
 			assert.Equalf(t, tt.wantFocus, gotFocus, "ParseStyles(%v, %v)", tt.args.base, tt.args.classes)
 			assert.Equalf(t, tt.wantDisabled, gotDisabled, "ParseStyles(%v, %v)", tt.args.base, tt.args.classes)
 			assert.Equalf(t, tt.wantActive, gotActive, "ParseStyles(%v, %v)", tt.args.base, tt.args.classes)
 			assert.Equalf(t, tt.wantSelected, gotSelected, "ParseStyles(%v, %v)", tt.args.base, tt.args.classes)
+			assert.Equalf(t, tt.wantHover, gotHover, "ParseStyles(%v, %v)", tt.args.base, tt.args.classes)
 		})
 	}
 }

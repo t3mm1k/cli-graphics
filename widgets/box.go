@@ -85,3 +85,7 @@ func (b *Box) HandleKey(key string) bool {
 
 	return false
 }
+
+func (b *Box) Children() []engine.Component {
+	return b.children
+}

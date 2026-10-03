@@ -337,7 +337,7 @@ func applyRule(s *Style, rule string) {
 	// TODO Переписать функции, привести к одному виду
 }
 
-func ParseStyles(base Style, classes []string) (normal, focus, disabled, active, selected Style) {
+func ParseStyles(base Style, classes []string) (normal, focus, disabled, active, selected, hover Style) {
 	normal = base
 	classStr := strings.Join(classes, " ")
 	tokens := strings.Fields(classStr)
@@ -350,6 +350,7 @@ func ParseStyles(base Style, classes []string) (normal, focus, disabled, active,
 	disabled = normal
 	active = normal
 	selected = normal
+	hover = normal
 	for _, class := range tokens {
 		switch {
 		case strings.HasPrefix(class, "focus:"):
@@ -360,7 +361,9 @@ func ParseStyles(base Style, classes []string) (normal, focus, disabled, active,
 			applyRule(&active, strings.TrimPrefix(class, "active:"))
 		case strings.HasPrefix(class, "selected:"):
 			applyRule(&selected, strings.TrimPrefix(class, "selected:"))
+		case strings.HasPrefix(class, "hover:"):
+			applyRule(&hover, strings.TrimPrefix(class, "hover:"))
 		}
 	}
-	return normal, focus, disabled, active, selected
+	return normal, focus, disabled, active, selected, hover
 }
