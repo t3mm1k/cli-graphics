@@ -6,12 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
-const DefaultListViewClasses = "border-single border:dim-gray fg:default text-left"
+const DefaultListViewClasses = "border-single border:dim-gray fg:default text-left focus:border:neon-pink selected:fg:yellow selected:bold"
 
 type ListView struct {
 	engine.BaseComponent
 
-	lines []string
+	lines         []string
+	selectedIndex int
+	focused       bool
 }
 
 func NewList(w, h, x, y int, lines []string, classes ...string) *ListView {
