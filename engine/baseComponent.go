@@ -51,8 +51,13 @@ func (b *BaseComponent) GetCoords() (x, y int) {
 	return b.x, b.y
 }
 
-func (b *BaseComponent) InitStyle(defaultStyle Style, classes ...string) {
-	b.Style, b.FocusedStyle, b.DisabledStyle, b.ActiveStyle, b.SelectedStyle = ParseStyles(defaultStyle, classes)
+func (b *BaseComponent) InitStyle(defaultClasses string, classes ...string) {
+	allClasses := make([]string, 0, 1+len(classes))
+	if defaultClasses != "" {
+		allClasses = append(allClasses, defaultClasses)
+	}
+	allClasses = append(allClasses, classes...)
+	b.Style, b.FocusedStyle, b.DisabledStyle, b.ActiveStyle, b.SelectedStyle = ParseStyles(DefaultStyle(), allClasses)
 }
 
 func (b *BaseComponent) CurrentStyle() Style {
