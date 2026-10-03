@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"bytes"
 	"cli-graphics/utils"
 	"fmt"
 	"os"
@@ -168,7 +169,7 @@ func (a *App) listenResize() {
 }
 
 func (a *App) listenKeys() {
-	buffer := make([]byte, 16)
+	buffer := make([]byte, 64)
 
 	for {
 		n, err := os.Stdin.Read(buffer)
@@ -176,13 +177,23 @@ func (a *App) listenKeys() {
 			return
 		}
 
-		key := utils.ParseKey(buffer[:n])
+		if bytes.HasPrefix(buffer[:n], []byte("\x1b[<")) {
+			if mouse, ok := utils.ParseSGRMouse(buffer[:n]); ok {
+				select {
+				case <-a.stopChan:
+					return
+				case a.events <- &MouseEvent{X: mouse.X, Y: mouse.Y, MouseButton: mouse.Button, MouseAction: mouse.Action}:
+					return
+				}
+			}
+		} else {
+			key := utils.ParseKey(buffer[:n])
+			select {
+			case <-a.stopChan:
+				return
+			case a.events <- &KeyEvent{Key: key}:
 
-		select {
-		case <-a.stopChan:
-			return
-		case a.events <- &KeyEvent{Key: key}:
-
+			}
 		}
 	}
 }
