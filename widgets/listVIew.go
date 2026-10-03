@@ -105,3 +105,10 @@ func (l *ListView) Render(canvas *engine.Canvas) {
 }
 
 func (l *ListView) OnTick() {}
+
+func (l *ListView) GetSelected() (int, string) {
+	if l.selectedIndex >= 0 && l.selectedIndex < len(l.lines) {
+		return l.selectedIndex, l.lines[l.selectedIndex]
+	}
+	return -1, ""
+}
