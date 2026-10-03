@@ -245,13 +245,13 @@ func parseColorRule(s *Style, str string) bool {
 	var prefix string
 	switch {
 	case strings.HasPrefix(str, "bg:"):
-		prefix = "bg-"
+		prefix = "bg:"
 	case strings.HasPrefix(str, "fg:"):
-		prefix = "fg-"
+		prefix = "fg:"
 	case strings.HasPrefix(str, "border:"):
-		prefix = "bg-"
+		prefix = "border:"
 	case strings.HasPrefix(str, "border-bg:"):
-		prefix = "fg-"
+		prefix = "border-bg:"
 	default:
 		return false
 	}
@@ -259,13 +259,13 @@ func parseColorRule(s *Style, str string) bool {
 	val := strings.TrimPrefix(str, prefix)
 	if color, ok := ParseColor(val); ok {
 		switch prefix {
-		case "bg-":
+		case "bg:":
 			s.Bg = color
-		case "fg-":
+		case "fg:":
 			s.Fg = color
-		case "border-":
+		case "border:":
 			s.BorderFg = color
-		case "border-bg":
+		case "border-bg:":
 			s.BorderBg = color
 		default:
 			return false
@@ -300,8 +300,8 @@ func ParseColor(val string) (Color, bool) {
 		return color, true
 	}
 
-	if strings.HasPrefix(val, "#") {
-		hexStr := strings.TrimPrefix(val, "#")
+	if after, ok := strings.CutPrefix(val, "#"); ok {
+		hexStr := after
 		if len(hexStr) == 6 {
 			rgb, err := strconv.ParseUint(hexStr, 16, 32)
 			if err == nil {
