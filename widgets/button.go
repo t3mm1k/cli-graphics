@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const DefaultButtonClasses = "border-single border:dim-gray fg:default text-center focus:border-double focus:border:default disabled:dim active:reverse"
+const DefaultButtonClasses = "border-single border:dim-gray fg:default text-center focus:border-double focus:border:default disabled:dim active:reverse hover:border:white"
 
 type Button struct {
 	engine.BaseComponent
