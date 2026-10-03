@@ -33,6 +33,15 @@ func NewList(w, h, x, y int, lines []string, classes ...string) *ListView {
 	return list
 }
 
+func (l *ListView) SetFocus(focused bool) {
+	l.focused = focused
+}
+
+func (l *ListView) IsFocused() bool {
+	return engine.FocusManagerInstance.GetFocused() == l.GetId()
+}
+
+
 func (l *ListView) Render(canvas *engine.Canvas) {
 	style := l.CurrentStyle()
 	w, h := l.GetSize()
