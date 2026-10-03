@@ -336,3 +336,31 @@ func applyRule(s *Style, rule string) {
 	parseColorRule(s, rule)
 	// TODO Переписать функции, привести к одному виду
 }
+
+func ParseStyles(base Style, classes []string) (normal, focus, disabled, active, selected Style) {
+	normal = base
+	classStr := strings.Join(classes, " ")
+	tokens := strings.Fields(classStr)
+	for _, class := range tokens {
+		if !strings.Contains(class, ":") || strings.HasPrefix(class, "fg:") || strings.HasPrefix(class, "bg:") || strings.HasPrefix(class, "border:") || strings.HasPrefix(class, "border-bg:") {
+			applyRule(&normal, class)
+		}
+	}
+	focus = normal
+	disabled = normal
+	active = normal
+	selected = normal
+	for _, class := range tokens {
+		switch {
+		case strings.HasPrefix(class, "focus:"):
+			applyRule(&focus, strings.TrimPrefix(class, "focus:"))
+		case strings.HasPrefix(class, "disabled:"):
+			applyRule(&disabled, strings.TrimPrefix(class, "disabled:"))
+		case strings.HasPrefix(class, "active:"):
+			applyRule(&active, strings.TrimPrefix(class, "active:"))
+		case strings.HasPrefix(class, "selected:"):
+			applyRule(&selected, strings.TrimPrefix(class, "selected:"))
+		}
+	}
+	return normal, focus, disabled, active, selected
+}
