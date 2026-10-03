@@ -13,14 +13,8 @@ type Label struct {
 	text string
 }
 
-func NewLabel(x, y int, border bool, text string, l ...int) *Label {
-	var width int
-
-	if len(l) > 0 {
-		width = l[0]
-	} else {
-		width = utf8.RuneCountInString(text)
-	}
+func NewLabel(x, y int, border bool, text string, classes ...string) *Label {
+	width := utf8.RuneCountInString(text)
 	width, height := utils.GetActuallySize(border, width, 1)
 
 	id := uuid.New()
@@ -29,15 +23,23 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 		text:          text,
 	}
 
-	defaultClasses := "border-none fg:default text-left"
+	defaultClasses := "border-none fg:white text-left"
 	if border {
-		defaultClasses = "border-single border:dim-gray fg:default text-left"
+		defaultClasses = "border-single border:dim-gray fg:white text-left"
 	}
-	lbl.InitStyle(defaultClasses)
+	lbl.InitStyle(defaultClasses, classes...)
 
 	engine.Registry.AddComponent(lbl)
 
 	return lbl
+}
+
+func (l *Label) SetText(text string) {
+	l.text = text
+	width := utf8.RuneCountInString(text)
+	border := l.Style.Border != engine.BorderNone
+	width, height := utils.GetActuallySize(border, width, 1)
+	l.SetSize(width, height)
 }
 
 func (l *Label) Render(canvas *engine.Canvas) {
