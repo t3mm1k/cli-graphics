@@ -19,6 +19,9 @@ type App struct {
 	actions  chan func()
 	tickRate time.Duration
 
+	hoveredComp Component
+	pressedComp Component
+
 	shortcuts map[string]func()
 
 	running  bool
@@ -88,7 +91,6 @@ func (a *App) Run() error {
 	}()
 	defer setupTerminal()()
 
-	fmt.Print("\u001B[?1049h\u001B[?25l\u001B[?7l")
 	fmt.Print("\u001B[?1049h\u001B[?25l\u001B[?7l\033[?1000h\033[?1002h\033[?1006h")
 
 	go a.listenKeys()
@@ -120,6 +122,8 @@ func (a *App) Run() error {
 				a.draw()
 			case *MouseEvent:
 				Log.Debug("app: mouse event", "event", e)
+				a.handleMouse(e)
+				a.draw()
 
 			case *TerminalResizeEvent:
 				a.buffer.SetSize(e.Width, e.Height)
@@ -232,7 +236,7 @@ func (a *App) cleanup() {
 		_ = term.Restore(int(os.Stdin.Fd()), a.oldTermState)
 	}
 
-	fmt.Print("\u001B[?7h\u001B[?25h\u001B[?1049l\\033[?1006l\\033[?1002l\\033[?1000l")
+	fmt.Print("\u001B[?7h\u001B[?25h\u001B[?1049l\033[?1006l\033[?1002l\033[?1000l")
 	fmt.Print("\033[?1006l\033[?1002l\033[?1000l")
 
 	if a.logFile != nil {
@@ -258,5 +262,35 @@ func (a *App) Post(action func()) {
 	case <-a.stopChan:
 		return
 	case a.actions <- action:
+	}
+}
+
+func (a *App) handleMouse(event *MouseEvent) {
+	target := HitTest(a.root, event.X, event.Y)
+	if target != nil {
+		switch event.MouseAction {
+		case utils.MouseActionMove:
+			if target != a.hoveredComp {
+				a.hoveredComp.SetHovered(false)
+				target.SetHovered(true)
+				a.hoveredComp = target
+			}
+		case utils.MouseActionPress:
+			if target != a.pressedComp {
+				a.pressedComp.SetHovered(false)
+				target.SetHovered(true)
+				a.pressedComp = target
+			}
+		case utils.MouseActionRelease:
+			if a.pressedComp != nil {
+				a.pressedComp.SetHovered(false)
+				if target == a.pressedComp {
+					if handler, ok := target.(MouseHandler); ok {
+						handler.HandleMouse(event)
+					}
+				}
+			}
+		}
+
 	}
 }
