@@ -85,6 +85,7 @@ func (a *App) Run() error {
 			panic(r)
 		}
 	}()
+	defer setupTerminal()()
 
 	fmt.Print("\u001B[?1049h\u001B[?25l\u001B[?7l")
 
@@ -235,7 +236,7 @@ func (a *App) draw() {
 	canvas := NewCanvas(a.buffer)
 	a.root.Render(canvas)
 	// a.buffer.Flush()
-	fmt.Print(a.buffer.Flush()) 
+	fmt.Print("\033[H" + a.buffer.Flush())
 }
 
 func (a *App) Post(action func()) {
