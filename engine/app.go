@@ -88,6 +88,7 @@ func (a *App) Run() error {
 	}()
 	defer setupTerminal()()
 
+	fmt.Print("\u001B[?1049h\u001B[?25l\u001B[?7l")
 	fmt.Print("\u001B[?1049h\u001B[?25l\u001B[?7l\033[?1000h\033[?1002h\033[?1006h")
 
 	go a.listenKeys()
@@ -232,6 +233,7 @@ func (a *App) cleanup() {
 	}
 
 	fmt.Print("\u001B[?7h\u001B[?25h\u001B[?1049l\\033[?1006l\\033[?1002l\\033[?1000l")
+	fmt.Print("\033[?1006l\033[?1002l\033[?1000l")
 
 	if a.logFile != nil {
 		_ = a.logFile.Close()
