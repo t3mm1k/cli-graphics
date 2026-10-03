@@ -12,24 +12,29 @@ type Box struct {
 	focused  bool
 }
 
+const DefaultBoxClasses = "border-single border:dim-gray bg:default"
+
 func (b *Box) IsFocused() bool {
 	return b.focused
 }
 
-func NewBox(x, y, w, h int) *Box {
+func NewBox(x, y, w, h int, classes ...string) *Box {
 	id := uuid.New()
 
 	box := &Box{
 		BaseComponent: engine.NewBaseComponent(id, x, y, w, h),
 	}
 
+	box.InitStyle(DefaultBoxClasses, classes...)
+
 	engine.Registry.AddComponent(box)
 	return box
 }
 
 func (b *Box) Render(canvas *engine.Canvas) {
+	style := b.CurrentStyle()
 	w, h := b.GetSize()
-	canvas.DrawRect(0, 0, w, h, engine.BorderSingle, engine.ColorDefault(), engine.ColorDefault())
+	canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
 
 	for _, child := range b.children {
 		x, y := child.GetCoords()

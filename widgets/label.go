@@ -9,9 +9,8 @@ import (
 )
 
 type Label struct {
-	text   string
-	border bool
 	engine.BaseComponent
+	text string
 }
 
 func NewLabel(x, y int, border bool, text string, l ...int) *Label {
@@ -28,8 +27,13 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 	lbl := &Label{
 		BaseComponent: engine.NewBaseComponent(id, x, y, width, height),
 		text:          text,
-		border:        border,
 	}
+
+	defaultClasses := "border-none fg:default text-left"
+	if border {
+		defaultClasses = "border-single border:dim-gray fg:default text-left"
+	}
+	lbl.InitStyle(defaultClasses)
 
 	engine.Registry.AddComponent(lbl)
 
@@ -37,13 +41,25 @@ func NewLabel(x, y int, border bool, text string, l ...int) *Label {
 }
 
 func (l *Label) Render(canvas *engine.Canvas) {
-	if l.border {
-		w, h := l.GetSize()
-		canvas.DrawRect(0, 0, w, h, engine.BorderSingle, engine.ColorDefault(), engine.ColorDefault())
-		canvas.DrawString(1, 1, l.text, engine.ColorDefault())
-	} else {
-		canvas.DrawString(0, 0, l.text, engine.ColorDefault())
+	style := l.CurrentStyle()
+	w, h := l.GetSize()
+
+	offset := 0
+	if style.Border != engine.BorderNone {
+		canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
+		offset = 1
 	}
+
+	textX := offset + style.Padding.Left
+	switch style.Align {
+	case engine.TextAlignCenter:
+		textX = w / 2
+	case engine.TextAlignRight:
+		textX = w - offset - style.Padding.Right
+	}
+	textY := offset + style.Padding.Top
+
+	canvas.DrawStringAligned(textX, textY, l.text, style.Fg, style.TextStyle, style.Align)
 }
 
 func (l *Label) OnTick() {}

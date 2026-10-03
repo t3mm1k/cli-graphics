@@ -98,10 +98,14 @@ func (c *Canvas) DrawRect(x, y, w, h int, borderStyle BorderType, borderColor Co
 		return
 	}
 
+	if borderStyle == BorderNone {
+		if !bgColor.IsDefault {
+			c.Fill(x, y, w, h, NewCellColored(' ', ColorDefault(), bgColor))
+		}
+		return
+	}
+
 	// Заливаем фон внутренности (без обводки)
-	// Вариант А: фон только внутри, обводка с дефолтным цветом
-	// Вариант Б: фон включая обводку
-	// Выбран Вариант А — обводка остаётся с borderColor, фон только внутри
 	if !bgColor.IsDefault {
 		c.Fill(x+1, y+1, w-2, h-2, NewCellColored(' ', ColorDefault(), bgColor))
 	}
@@ -122,6 +126,12 @@ func (c *Canvas) DrawRect(x, y, w, h int, borderStyle BorderType, borderColor Co
 		tr = NewCellColored('╮', borderColor, ColorDefault())
 		bl = NewCellColored('╰', borderColor, ColorDefault())
 		br = NewCellColored('╯', borderColor, ColorDefault())
+	case BorderBold:
+		hLine, vLine = NewCellColored('━', borderColor, ColorDefault()), NewCellColored('┃', borderColor, ColorDefault())
+		tl = NewCellColored('┏', borderColor, ColorDefault())
+		tr = NewCellColored('┓', borderColor, ColorDefault())
+		bl = NewCellColored('┗', borderColor, ColorDefault())
+		br = NewCellColored('┛', borderColor, ColorDefault())
 	default: // BorderSingle
 		hLine, vLine = NewCellColored('─', borderColor, ColorDefault()), NewCellColored('│', borderColor, ColorDefault())
 		tl = NewCellColored('┌', borderColor, ColorDefault())

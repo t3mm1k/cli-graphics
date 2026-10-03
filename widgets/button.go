@@ -8,26 +8,26 @@ import (
 	"github.com/google/uuid"
 )
 
+const DefaultButtonClasses = "border-single border:dim-gray fg:default text-center focus:border-double focus:border:default disabled:dim active:reverse"
+
 type Button struct {
 	engine.BaseComponent
 
 	text    string
-	borderColor     engine.Color
-	focusColor      engine.Color
 	OnClick func()
 }
 
-func NewButton(x, y int, text string, onClick func()) *Button {
+func NewButton(x, y int, text string, onClick func(), classes ...string) *Button {
 	id := uuid.New()
 	width := utf8.RuneCountInString(text)
 	width, height := utils.GetActuallySize(true, width, 1)
 	btn := &Button{
 		BaseComponent: engine.NewBaseComponent(id, x, y, width, height),
 		text:          text,
-		borderColor: engine.ColorDimGray,
-		focusColor:  engine.ColorNeonCyan,
 		OnClick:       onClick,
 	}
+
+	btn.InitStyle(DefaultButtonClasses, classes...)
 
 	engine.Registry.AddComponent(btn)
 	engine.FocusManagerInstance.Register(id)
@@ -63,20 +63,28 @@ func (b *Button) HandleKey(key string) bool {
 }
 
 func (b *Button) Render(canvas *engine.Canvas) {
+	style := b.CurrentStyle()
 	w, h := b.GetSize()
 
-	borderStyle := engine.BorderSingle
-	borderColor := b.borderColor
-	if b.IsFocused() {
-		borderStyle = engine.BorderDouble
-		borderColor = b.focusColor
-	}
+	canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
 
-	canvas.DrawRect(0, 0, w, h, borderStyle, borderColor, engine.ColorDefault())
-	canvas.DrawString(1, 1, b.text, engine.ColorDefault())
+	offset := 1
+	if style.Border == engine.BorderNone {
+		offset = 0
+	}
+	textX := offset + style.Padding.Left
+	switch style.Align {
+	case engine.TextAlignCenter:
+		textX = w / 2
+	case engine.TextAlignRight:
+		textX = w - offset - style.Padding.Right
+	}
+	textY := offset + style.Padding.Top
+
+	canvas.DrawStringAligned(textX, textY, b.text, style.Fg, style.TextStyle, style.Align)
 }
 
 func (b *Button) SetColors(normal, focus engine.Color) {
-	b.borderColor = normal
-	b.focusColor = focus
+	b.Style.BorderFg = normal
+	b.FocusedStyle.BorderFg = focus
 }
