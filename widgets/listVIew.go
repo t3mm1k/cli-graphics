@@ -63,7 +63,7 @@ func (l *ListView) HandleKey(key string) bool {
 			l.selectedIndex = len(l.lines) - 1 // зацикливание вверх
 		}
 		return true
-		
+
 	case "Enter", " ":
 		if l.OnSelect != nil && l.selectedIndex >= 0 && l.selectedIndex < len(l.lines) {
 			l.OnSelect(l.selectedIndex, l.lines[l.selectedIndex])
@@ -118,4 +118,37 @@ func (l *ListView) GetSelected() (int, string) {
 		return l.selectedIndex, l.lines[l.selectedIndex]
 	}
 	return -1, ""
+}
+
+func (l *ListView) HandleMouse(mouseEvent *engine.MouseEvent) bool {
+	if len(l.lines) == 0 || mouseEvent.MouseButton != 0 {
+		return false
+	}
+
+	style := l.CurrentStyle()
+	offset := 0
+	if style.Border != 0 { // engine.BorderNone равен 0
+		offset = 1
+	}
+
+	relativeY := mouseEvent.Y - offset - style.Padding.Top
+
+	if relativeY < 0 || relativeY >= len(l.lines) {
+		return false
+	}
+
+	_, h := l.GetSize()
+	if offset > 0 && relativeY >= h-2 {
+		return false
+	}
+
+	if l.selectedIndex == relativeY {
+		if l.OnSelect != nil {
+			l.OnSelect(l.selectedIndex, l.lines[l.selectedIndex])
+		}
+	} else {
+		l.selectedIndex = relativeY
+	}
+
+	return true
 }
