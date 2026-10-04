@@ -290,12 +290,22 @@ func (a *App) handleMouse(event *MouseEvent) {
 				a.pressedComp.SetActive(false)
 				if target == a.pressedComp {
 					if handler, ok := target.(MouseHandler); ok {
-						handler.HandleMouse(event)
+						// Получаем глобальные координаты самого виджета на экране
+						compX, compY := target.GetCoords()
+						
+						// Создаем копию события мыши, но переводим X и Y в локальную систему координат виджета
+						localEvent := *event
+						localEvent.X = event.X - compX
+						localEvent.Y = event.Y - compY
+
+						// Передаем виджету событие с правильными локальными координатами (от 0,0)
+						handler.HandleMouse(&localEvent)
 					}
 				}
 				a.pressedComp = nil
 			}
 			a.draw()
+
 		}
 
 	}
