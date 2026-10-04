@@ -6,6 +6,8 @@ import (
 	"github.com/google/uuid"
 )
 
+var _ engine.MouseHandler = (*ListView)(nil)
+
 const DefaultListViewClasses = "border-single border:dim-gray fg:default text-left focus:border:neon-pink selected:fg:yellow selected:bold"
 
 type ListView struct {
@@ -24,6 +26,7 @@ func NewList(w, h, x, y int, lines []string, classes ...string) *ListView {
 		lines:         lines,
 		selectedIndex: 0,
 		focused:       false,
+		OnSelect:      nil,
 	}
 
 	list.InitStyle(DefaultListViewClasses, classes...)
