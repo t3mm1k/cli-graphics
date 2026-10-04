@@ -74,6 +74,13 @@ func main() {
 	playlist := widgets.NewList(35, 12, 42, 5, tracks, "border-rounded border:dim-gray fg:white focus:border:neon-pink")
 	root.AddChild(playlist)
 
+	playlist.OnSelect = func(index int, text string) {
+		// При выборе трека обновляем информацию на панели плеера
+		trackTitle.SetText(text)
+		artistName.SetText(fmt.Sprintf("Track #%d from current queue", index+1))
+		statusLabel.SetText("▶ Playing  [00:00 / 03:00]")
+	}
+
 	// 7. Поле поиска треков снизу
 	searchLabel := widgets.NewLabel(42, 18, false, "🔍 Search track:", "fg:dim-gray")
 	root.AddChild(searchLabel)
