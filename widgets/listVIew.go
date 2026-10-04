@@ -14,6 +14,7 @@ type ListView struct {
 	lines         []string
 	selectedIndex int
 	focused       bool
+	OnSelect      func(index int, text string)
 }
 
 func NewList(w, h, x, y int, lines []string, classes ...string) *ListView {
@@ -60,6 +61,12 @@ func (l *ListView) HandleKey(key string) bool {
 			l.selectedIndex--
 		} else {
 			l.selectedIndex = len(l.lines) - 1 // зацикливание вверх
+		}
+		return true
+		
+	case "Enter", " ":
+		if l.OnSelect != nil && l.selectedIndex >= 0 && l.selectedIndex < len(l.lines) {
+			l.OnSelect(l.selectedIndex, l.lines[l.selectedIndex])
 		}
 		return true
 	}
