@@ -14,4 +14,7 @@ type Component interface {
 	GetId() uuid.UUID
 
 	OnTick()
+
+	SetActive(active bool)
+	SetHovered(hovered bool)
 }

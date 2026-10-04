@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const DefaultButtonClasses = "border-single border:dim-gray fg:default text-center focus:border-double focus:border:default disabled:dim active:reverse"
+const DefaultButtonClasses = "border-single border:dim-gray fg:default text-center focus:border-double focus:border:default disabled:dim active:reverse hover:border:white"
 
 type Button struct {
 	engine.BaseComponent
@@ -87,4 +87,14 @@ func (b *Button) Render(canvas *engine.Canvas) {
 func (b *Button) SetColors(normal, focus engine.Color) {
 	b.Style.BorderFg = normal
 	b.FocusedStyle.BorderFg = focus
+}
+
+func (b *Button) HandleMouse(e *engine.MouseEvent) bool {
+	if e.MouseButton == utils.MouseBtnLeft {
+		if b.OnClick != nil {
+			b.OnClick()
+		}
+		return true
+	}
+	return false
 }

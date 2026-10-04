@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const DefaultInputClasses = "border-single border:dim-gray fg:white focus:border-double disabled:dim"
+const DefaultInputClasses = "border-single border:dim-gray fg:white focus:border-double disabled:dim hover:border:white"
 
 type Input struct {
 	engine.BaseComponent
