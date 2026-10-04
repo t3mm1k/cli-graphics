@@ -46,19 +46,12 @@ func main() {
 	root.AddChild(t5)
 
 	// Колонка 3: Цветовая палитра (Colors)
-	col3Title := widgets.NewLabel(58, 4, false, "3. COLOR PALETTE:", "fg:neon-cyan bold")
+	col3Title := widgets.NewLabel(58, 4, false, "3. INTERACTIVE LIST:", "fg:neon-cyan bold")
 	root.AddChild(col3Title)
 
-	c1 := widgets.NewLabel(58, 6, false, "● Neon Cyan", "fg:neon-cyan")
-	c2 := widgets.NewLabel(58, 7, false, "● Neon Pink", "fg:neon-pink")
-	c3 := widgets.NewLabel(58, 8, false, "● Pastel Green", "fg:pastel-green")
-	c4 := widgets.NewLabel(58, 9, false, "● Gold / Amber", "fg:gold")
-	c5 := widgets.NewLabel(58, 10, false, "● Coral / Orange", "fg:coral")
-	root.AddChild(c1)
-	root.AddChild(c2)
-	root.AddChild(c3)
-	root.AddChild(c4)
-	root.AddChild(c5)
+	listItems := []string{"Go / Golang", "Python", "C++ / C", "JavaScript"}
+	galleryList := widgets.NewList(20, 6, 58, 6, listItems, "border-rounded border:dim-gray fg:white focus:border:neon-pink selected:fg:pastel-green" )
+	root.AddChild(galleryList)
 
 	// Разделитель
 	divider := widgets.NewLabel(2, 12, false, "────────────────────────────────────────────────────────────────────────────", "fg:dark-gray")
