@@ -172,7 +172,69 @@ func (ta *TextArea) Render(canvas *engine.Canvas) {
 		}
 		textY := offset + style.Padding.Top + i
 
-		canvas.DrawStringAligned(textX, textY, wrappedLines[lineIndex], style.Fg, style.TextStyle, style.Align)
+		ta.renderMarkdownLine(canvas, textX, textY, textW, wrappedLines[lineIndex], style)
+	}
+}
+
+// renderMarkdownLine разбирает строку на наличие `#` (заголовки) и `**` (жирный текст)
+// и посимвольно выводит её на холст с соответствующими атрибутами стилей.
+func (ta *TextArea) renderMarkdownLine(canvas *engine.Canvas, startX, startY, maxW int, line string, baseStyle engine.Style) {
+	runes := []rune(line)
+	if len(runes) == 0 {
+		return
+	}
+
+	isHeader := false
+	if len(runes) >= 2 && runes[0] == '#' && runes[1] == ' ' {
+		isHeader = true
+		runes = runes[2:]
+	}
+
+	currentStyle := baseStyle.TextStyle
+	currentFg := baseStyle.Fg
+
+	if isHeader {
+		currentStyle = engine.TextStyleBold
+		// // можно подсветить заголовок желтым
+		// if yellowColor, ok := engine.BaseColors.Get("yellow"); ok {
+		// 	currentFg = yellowColor
+		// }
+	}
+
+	x := startX
+	actualLen := len(runes)
+	
+	switch baseStyle.Align {
+	case engine.TextAlignCenter:
+		x = startX + (maxW-actualLen)/2
+	case engine.TextAlignRight:
+		x = startX + maxW - actualLen
+	}
+
+	isBoldMode := false
+	visualIdx := 0
+
+	for j := 0; j < len(runes); j++ {
+		if visualIdx >= maxW {
+			break
+		}
+
+		if !isHeader && j < len(runes)-1 && runes[j] == '*' && runes[j+1] == '*' {
+			isBoldMode = !isBoldMode
+			j++
+			continue
+		}
+
+		finalStyle := currentStyle
+		if isBoldMode {
+			finalStyle = engine.TextStyleBold
+		}
+
+		cell := engine.NewCellColored(runes[j], currentFg, baseStyle.Bg)
+		cell.Style = finalStyle
+
+		canvas.SetCell(x+visualIdx, startY, cell)
+		visualIdx++
 	}
 }
 
