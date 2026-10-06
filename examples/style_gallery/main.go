@@ -45,12 +45,12 @@ func main() {
 	root.AddChild(t4)
 	root.AddChild(t5)
 
-	// Колонка 3: Цветовая палитра (Colors)
+	// Колонка 3: Интерактивный список (Selectable List)
 	col3Title := widgets.NewLabel(58, 4, false, "3. INTERACTIVE LIST:", "fg:neon-cyan bold")
 	root.AddChild(col3Title)
 
 	listItems := []string{"Go / Golang", "Python", "C++ / C", "JavaScript"}
-	galleryList := widgets.NewList(20, 6, 58, 6, listItems, "border-rounded border:dim-gray fg:white focus:border:neon-pink selected:fg:pastel-green" )
+	galleryList := widgets.NewList(20, 6, 58, 6, listItems, "border-rounded border:dim-gray fg:white focus:border:neon-pink selected:fg:pastel-green")
 	root.AddChild(galleryList)
 
 	// Разделитель
@@ -68,12 +68,12 @@ func main() {
 	btnClick := widgets.NewButton(4, 17, "Click Me (+1)", func() {
 		counter++
 		counterLabel.SetText(fmt.Sprintf("Click count: %d", counter))
-	}, "border-rounded border:dim-gray fg:white focus:border:yellow active:reverse")
+	}, "border-rounded border:dim-gray fg:white focus:border:yellow active:reverse px-2")
 
-	btnReset := widgets.NewButton(22, 17, "Reset", func() {
+	btnReset := widgets.NewButton(22, 17, "  Reset  ", func() {
 		counter = 0
 		counterLabel.SetText("Click count: 0")
-	}, "border-rounded border:dim-gray fg:coral focus:border:red active:reverse")
+	}, "border-rounded border:dim-gray fg:coral focus:border:red active:reverse px-2")
 
 	root.AddChild(btnClick)
 	root.AddChild(btnReset)
@@ -86,8 +86,42 @@ func main() {
 	}, "border-single border:dim-gray fg:white focus:border:neon-cyan")
 	root.AddChild(input)
 
-	// Навигационная подсказка
-	help := widgets.NewLabel(2, 22, false, "[Tab / Shift+Tab] Navigate focus  •  [Enter / Space] Activate  •  [Ctrl+C] Exit", "fg:dim-gray")
+	
+	galleryList.OnSelect = func(index int, text string) {
+		inputLabel.SetText(fmt.Sprintf("Selected language: %s", text))
+	}
+
+	// Секция многострочного текста (TextArea и InputArea)
+	divider2 := widgets.NewLabel(2, 20, false, "────────────────────────────────────────────────────────────────────────────", "fg:dark-gray")
+	root.AddChild(divider2)
+
+	multiLineTitle := widgets.NewLabel(4, 21, false, "5. MULTI-LINE TEXT COMPONENTS (TextArea & InputArea):", "fg:neon-cyan bold")
+	root.AddChild(multiLineTitle)
+
+	// Текст с Markdown для TextArea
+	mdText := "# Markdown Preview\n" +
+		"This is a **TextArea** component.\n" +
+		"It supports automatic **Word Wrap** parsing.\n" +
+		"You can scroll it up and down using **Arrow keys** when focused.\n" +
+		"# Another Header\n" +
+		"End of document text line."
+
+	taLabel := widgets.NewLabel(4, 23, false, "TextArea (Read-only + MD + Scroll):", "fg:dim-gray")
+	root.AddChild(taLabel)
+
+	// TextArea шириной 34 и высотой 6
+	galleryTextArea := widgets.NewTextArea(34, 6, 4, 25, mdText)
+	root.AddChild(galleryTextArea)
+
+	iaLabel := widgets.NewLabel(42, 23, false, "InputArea (Multi-line editor + Scroll):", "fg:dim-gray")
+	root.AddChild(iaLabel)
+
+	// InputArea шириной 34 и высотой 6
+	galleryInputArea := widgets.NewInputArea(34, 6, 42, 25, "Type text here...\nPress Enter for new line.")
+	root.AddChild(galleryInputArea)
+
+	// Навигационная подсказка снизу
+	help := widgets.NewLabel(2, 34, false, "[Tab / Shift+Tab] Navigate focus  •  [Arrows] Scroll & Move Cursor  •  [Ctrl+C] Exit", "fg:dim-gray")
 	root.AddChild(help)
 
 	app := engine.NewApp(root)
