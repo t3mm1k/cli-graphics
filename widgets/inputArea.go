@@ -44,11 +44,6 @@ func (ia *InputArea) HandleKey(key string) bool {
 	textW := w - (offset * 2) - style.Padding.Left - style.Padding.Right
 	textH := h - (offset * 2) - style.Padding.Top - style.Padding.Bottom
 
-	wrappedLines := ia.wrapText(textW)
-	if len(wrappedLines) == 0 {
-		return false
-	}
-
 	switch key {
 	case "Up", "ArrowUp":
 		if ia.cursorY > 0 {
@@ -128,6 +123,20 @@ func (ia *InputArea) HandleKey(key string) bool {
 			char, _ := utf8.DecodeRuneInString(key)
 			lineRunes := []rune(ia.rawLines[ia.cursorY])
 			
+			if len(lineRunes) >= textW {
+				leftPart := string(lineRunes[:ia.cursorX])
+				rightPart := string(lineRunes[ia.cursorX:])
+
+				ia.rawLines[ia.cursorY] = leftPart
+				ia.rawLines = append(ia.rawLines[:ia.cursorY+1], append([]string{rightPart}, ia.rawLines[ia.cursorY+1:]...)...)
+				
+				ia.cursorY++
+				ia.cursorX = 0
+				ia.ensureCursorVisible(textH)
+				
+				lineRunes = []rune(ia.rawLines[ia.cursorY])
+			}
+
 			newRunes := append(lineRunes[:ia.cursorX], append([]rune{char}, lineRunes[ia.cursorX:]...)...)
 			ia.rawLines[ia.cursorY] = string(newRunes)
 			ia.cursorX++
@@ -153,25 +162,47 @@ func (ia *InputArea) OnTick() {
 }
 
 func (ia *InputArea) Render(canvas *engine.Canvas) {
-	ia.TextArea.Render(canvas)
+	w, h := ia.GetSize()
+	style := ia.CurrentStyle()
 
-	if ia.IsFocused() && ia.cursorIsVisible {
-		w, h := ia.GetSize()
-		style := ia.CurrentStyle()
+	canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
 
-		offset := 1
-		if style.Border == engine.BorderNone {
-			offset = 0
+	offset := 1
+	if style.Border == engine.BorderNone {
+		offset = 0
+	}
+
+	textW := w - (offset * 2) - style.Padding.Left - style.Padding.Right
+	textH := h - (offset * 2) - style.Padding.Top - style.Padding.Bottom
+
+	if textW <= 0 || textH <= 0 {
+		return
+	}
+
+	for i := 0; i < textH; i++ {
+		lineIndex := ia.topLine + i
+		if lineIndex >= len(ia.rawLines) {
+			break
 		}
 
-		textW := w - (offset * 2) - style.Padding.Left - style.Padding.Right
-		textH := h - (offset * 2) - style.Padding.Top - style.Padding.Bottom
+		textX := offset + style.Padding.Left
+		textY := offset + style.Padding.Top + i
 
+		runes := []rune(ia.rawLines[lineIndex])
+		
+		if len(runes) > textW {
+			runes = runes[:textW]
+		}
+
+		canvas.DrawStringAligned(textX, textY, string(runes), style.Fg, style.TextStyle, style.Align)
+	}
+
+	if ia.IsFocused() && ia.cursorIsVisible {
 		if ia.cursorY >= ia.topLine && ia.cursorY < ia.topLine+textH {
 			visualY := offset + style.Padding.Top + (ia.cursorY - ia.topLine)
 			visualX := offset + style.Padding.Left + ia.cursorX
-
-			if ia.cursorX <= textW && visualX < w-offset-style.Padding.Right {
+			
+			if visualX < w-offset-style.Padding.Right {
 				cursorColor := style.BorderFg
 				if cursorColor.IsDefault {
 					cursorColor = engine.ColorDefault()
