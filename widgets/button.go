@@ -72,10 +72,11 @@ func (b *Button) Render(canvas *engine.Canvas) {
 	if style.Border == engine.BorderNone {
 		offset = 0
 	}
+	
 	textX := offset + style.Padding.Left
 	switch style.Align {
 	case engine.TextAlignCenter:
-		textX = w / 2
+		textX = offset + style.Padding.Left + (w-offset*2-style.Padding.Left-style.Padding.Right)/2
 	case engine.TextAlignRight:
 		textX = w - offset - style.Padding.Right
 	}
@@ -83,6 +84,7 @@ func (b *Button) Render(canvas *engine.Canvas) {
 
 	canvas.DrawStringAligned(textX, textY, b.text, style.Fg, style.TextStyle, style.Align)
 }
+
 
 func (b *Button) SetColors(normal, focus engine.Color) {
 	b.Style.BorderFg = normal
