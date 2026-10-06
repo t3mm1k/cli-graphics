@@ -95,6 +95,12 @@ func (l *ListView) Render(canvas *engine.Canvas) {
 		}
 
 		textX := offset + style.Padding.Left
+		switch style.Align {
+		case engine.TextAlignCenter:
+			textX = offset + style.Padding.Left + (w-offset*2-style.Padding.Left-style.Padding.Right)/2
+		case engine.TextAlignRight:
+			textX = w - offset - style.Padding.Right
+		}
 		textY := offset + style.Padding.Top + i
 
 		marker := "• "
