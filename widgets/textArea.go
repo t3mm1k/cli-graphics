@@ -11,21 +11,26 @@ type TextArea struct {
 	engine.BaseComponent
 
 	rawLines []string
+	
+	topLine int
+	focused bool
 }
 
 func NewTextArea(w, h, x, y int, initialText string, classes ...string) *TextArea {
 	id := uuid.New()
-	
 	rawLines := strings.Split(initialText, "\n")
 
 	ta := &TextArea{
 		BaseComponent: engine.NewBaseComponent(id, x, y, w, h),
 		rawLines:     rawLines,
+		topLine:      0,
+		focused:      false,
 	}
 
-	ta.InitStyle("border-single border:dim-gray fg:white bg:default", classes...)
+	ta.InitStyle("border-single border:dim-gray fg:white bg:default focus:border:neon-pink", classes...)
 
 	engine.Registry.AddComponent(ta)
+	engine.FocusManagerInstance.Register(id)
 
 	return ta
 }
@@ -93,5 +98,82 @@ func (ta *TextArea) wrapText(maxLineWidth int) []string {
 	return wrappedLines
 }
 
-func (ta *TextArea) Render(canvas *engine.Canvas) {}
+func (ta *TextArea) SetFocus(focused bool) {
+	ta.focused = focused
+}
+
+func (ta *TextArea) IsFocused() bool {
+	return engine.FocusManagerInstance.GetFocused() == ta.GetId()
+}
+
+func (ta *TextArea) HandleKey(key string) bool {
+	style := ta.CurrentStyle()
+	w, h := ta.GetSize()
+	
+	offset := 1
+	if style.Border == engine.BorderNone {
+		offset = 0
+	}
+	
+	textH := h - (offset * 2) - style.Padding.Top - style.Padding.Bottom
+	wrappedLines := ta.wrapText(w - (offset * 2) - style.Padding.Left - style.Padding.Right)
+	
+	if len(wrappedLines) <= textH {
+		return false
+	}
+
+	switch key {
+	case "Down", "ArrowDown":
+		if ta.topLine < len(wrappedLines)-textH {
+			ta.topLine++
+			return true
+		}
+	case "Up", "ArrowUp":
+		if ta.topLine > 0 {
+			ta.topLine--
+			return true
+		}
+	}
+	return false
+}
+
+func (ta *TextArea) Render(canvas *engine.Canvas) {
+	w, h := ta.GetSize()
+	style := ta.CurrentStyle()
+
+	canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
+
+	offset := 1
+	if style.Border == engine.BorderNone {
+		offset = 0
+	}
+
+	textW := w - (offset * 2) - style.Padding.Left - style.Padding.Right
+	textH := h - (offset * 2) - style.Padding.Top - style.Padding.Bottom
+
+	if textW <= 0 || textH <= 0 {
+		return
+	}
+
+	wrappedLines := ta.wrapText(textW)
+
+	for i := 0; i < textH; i++ {
+		lineIndex := ta.topLine + i
+		if lineIndex >= len(wrappedLines) {
+			break
+		}
+
+		textX := offset + style.Padding.Left
+		switch style.Align {
+		case engine.TextAlignCenter:
+			textX = offset + style.Padding.Left + (textW)/2
+		case engine.TextAlignRight:
+			textX = w - offset - style.Padding.Right
+		}
+		textY := offset + style.Padding.Top + i
+
+		canvas.DrawStringAligned(textX, textY, wrappedLines[lineIndex], style.Fg, style.TextStyle, style.Align)
+	}
+}
+
 func (ta *TextArea) OnTick() {}
