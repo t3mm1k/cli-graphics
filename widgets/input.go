@@ -108,13 +108,21 @@ func (i *Input) Render(canvas *engine.Canvas) {
 
 	canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
 
-	textW := w - 2
+	offset := 1
+	if style.Border == engine.BorderNone {
+		offset = 0
+	}
+
+	textW := w - (offset * 2) - style.Padding.Left - style.Padding.Right
 	if textW <= 0 {
 		return
 	}
 
+	startX := offset + style.Padding.Left
+	startY := offset + style.Padding.Top
+
 	for col := 0; col < textW; col++ {
-		canvas.SetCell(1+col, 1, engine.NewCellColored(' ', style.Fg, style.Bg))
+		canvas.SetCell(startX+col, startY, engine.NewCellColored(' ', style.Fg, style.Bg))
 	}
 
 	start := 0
@@ -132,7 +140,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 
 			cell := engine.NewCellColored(charToRender, style.Fg, style.Bg)
 			cell.Style = style.TextStyle
-			canvas.SetCell(1+j, 1, cell)
+			canvas.SetCell(startX+j, startY, cell)
 		}
 	}
 
@@ -144,7 +152,7 @@ func (i *Input) Render(canvas *engine.Canvas) {
 				cursorColor = engine.ColorDefault()
 			}
 			cursorCell := engine.NewCellColored('_', cursorColor, style.Bg)
-			canvas.SetCell(1+visualCursorPos, 1, cursorCell)
+			canvas.SetCell(startX+visualCursorPos, startY, cursorCell)
 		}
 	}
 }
