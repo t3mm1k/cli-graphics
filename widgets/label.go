@@ -55,7 +55,7 @@ func (l *Label) Render(canvas *engine.Canvas) {
 	textX := offset + style.Padding.Left
 	switch style.Align {
 	case engine.TextAlignCenter:
-		textX = w / 2
+		textX = offset + style.Padding.Left + (w-offset*2-style.Padding.Left-style.Padding.Right)/2
 	case engine.TextAlignRight:
 		textX = w - offset - style.Padding.Right
 	}
