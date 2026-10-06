@@ -39,7 +39,13 @@ func (b *Box) Render(canvas *engine.Canvas) {
 	for _, child := range b.children {
 		x, y := child.GetCoords()
 		w, h := child.GetSize()
-		childCanvas := canvas.SubCanvas(x, y, w, h)
+		childCanvas := canvas.SubCanvas(
+			x+style.Padding.Left, 
+			y+style.Padding.Top, 
+			w-style.Padding.Left-style.Padding.Right, 
+			h-style.Padding.Top-style.Padding.Bottom,
+		)
+		
 		child.Render(childCanvas)
 	}
 }
