@@ -290,6 +290,9 @@ func DefaultStyle() Style {
 		Padding:   Padding{},
 		Align:     TextAlignLeft,
 		Overflow:  OverflowClip,
+		IsFlex:        false,
+		FlexDirection: "row",
+		FlexGrow:      0,
 	}
 }
 
@@ -322,6 +325,29 @@ func ParseColor(val string) (Color, bool) {
 	return ColorDefault(), false
 }
 
+func parseFlexRule(s *Style, str string) bool {
+	switch str {
+	case "flex":
+		s.IsFlex = true
+		if s.FlexDirection == "" {
+			s.FlexDirection = "row"
+		}
+		return true
+	case "flex-row":
+		s.IsFlex = true
+		s.FlexDirection = "row"
+		return true
+	case "flex-col":
+		s.IsFlex = true
+		s.FlexDirection = "col"
+		return true
+	case "flex-1":
+		s.FlexGrow = 1
+		return true
+	}
+	return false
+}
+
 func applyRule(s *Style, rule string) {
 	if border, ok := str2bordertype(rule); ok {
 		s.Border = border
@@ -339,6 +365,7 @@ func applyRule(s *Style, rule string) {
 	parsePadding(s, rule)
 	parseColorRule(s, rule)
 	// TODO Переписать функции, привести к одному виду
+	parseFlexRule(s, rule)
 }
 
 func ParseStyles(base Style, classes []string) (normal, focus, disabled, active, selected, hover Style) {
