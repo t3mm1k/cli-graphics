@@ -61,7 +61,6 @@ func (b *Box) Render(canvas *engine.Canvas) {
 			x = currentX
 			y = currentY
 
-			// Так как SetCoords принадлежит BaseComponent, проверяем, реализует ли его дочерний виджет
 			if setter, ok := child.(interface{ SetCoords(x, y int) }); ok {
 				setter.SetCoords(x, y)
 			}
@@ -72,29 +71,25 @@ func (b *Box) Render(canvas *engine.Canvas) {
 				currentY += ch
 			}
 		} else {
-			x, y = child.GetCoords()
-			x += style.Padding.Left
-			y += style.Padding.Top
+			// Проверяем наличие методов GetX/GetY у компонента безопасно
+			if getterX, ok := child.(interface{ GetX() int }); ok {
+				if getterY, ok := child.(interface{ GetY() int }); ok {
+					x = offset + style.Padding.Left + getterX.GetX()
+					y = offset + style.Padding.Top + getterY.GetY()
+				}
+			} else {
+				// Если методов GetX/GetY нет, возвращаем стандартный рабочий вариант ядра
+				cx, cy := child.GetCoords()
+				x = offset + style.Padding.Left + cx
+				y = offset + style.Padding.Top + cy
+			}
 		}
 
-		// Создаем изолированный SubCanvas для дочернего элемента с учетом рамок родителя
-		// В режиме flex ширина/высота уже обрезаны под контентную зону методом computeFlexLayout
-		var childCanvas *engine.Canvas
-		if style.IsFlex {
-			childCanvas = canvas.SubCanvas(x, y, cw, ch)
-		} else {
-			childCanvas = canvas.SubCanvas(
-				x, 
-				y, 
-				w-style.Padding.Left-style.Padding.Right, 
-				h-style.Padding.Top-style.Padding.Bottom,
-			)
-		}
+		childCanvas := canvas.SubCanvas(x, y, cw, ch)
 		
 		child.Render(childCanvas)
 	}
 }
-
 
 func (b *Box) OnTick() {
 	for _, child := range b.children {
@@ -168,23 +163,30 @@ func (b *Box) computeFlexLayout(style engine.Style) {
 			continue
 		}
 		
-		childComp, ok := engine.Registry.GetComponent(child.GetId())
-		var childStyle engine.Style
-		if ok {
-			if baseComp, isBase := childComp.(interface{ CurrentStyle() engine.Style }); isBase {
-				childStyle = baseComp.CurrentStyle()
+		var isFlex1 bool
+		if baseComp, ok := child.(interface{ GetId() uuid.UUID }); ok {
+			if comp, exists := engine.Registry.GetComponent(baseComp.GetId()); exists {
+				if reflectComp, hasStyle := comp.(interface{ CurrentStyle() engine.Style }); hasStyle {
+					isFlex1 = reflectComp.CurrentStyle().FlexGrow > 0
+					
+					if directComp, isDirect := comp.(*Button); isDirect {
+						isFlex1 = directComp.Style.FlexGrow > 0
+					} else if directBox, isBox := comp.(*Box); isBox {
+						isFlex1 = directBox.Style.FlexGrow > 0
+					}
+				}
 			}
 		}
 
 		if style.FlexDirection == "row" {
-			if childStyle.FlexGrow > 0 {
+			if isFlex1 {
 				growCount++
 			} else {
 				cw, _ := child.GetSize()
 				fixedSizeSum += cw
 			}
 		} else { // "col"
-			if childStyle.FlexGrow > 0 {
+			if isFlex1 {
 				growCount++
 			} else {
 				_, ch := child.GetSize()
@@ -221,22 +223,20 @@ func (b *Box) computeFlexLayout(style engine.Style) {
 			continue
 		}
 
-		childComp, ok := engine.Registry.GetComponent(child.GetId())
-		var childStyle engine.Style
-		if ok {
-			if baseComp, isBase := childComp.(interface{ CurrentStyle() engine.Style }); isBase {
-				childStyle = baseComp.CurrentStyle()
-			}
+		var isFlex1 bool
+		if directComp, isDirect := child.(*Button); isDirect {
+			isFlex1 = directComp.Style.FlexGrow > 0
+		} else if directBox, isBox := child.(*Box); isBox {
+			isFlex1 = directBox.Style.FlexGrow > 0
 		}
 
 		cw, ch := child.GetSize()
 
 		if style.FlexDirection == "row" {
-			// В режиме row высота всех детей растягивается под полную высоту контента контейнера
 			targetH := contentH
 			targetW := cw
 
-			if childStyle.FlexGrow > 0 {
+			if isFlex1 {
 				targetW = growSize
 				if remainder > 0 {
 					targetW++
@@ -245,11 +245,10 @@ func (b *Box) computeFlexLayout(style engine.Style) {
 			}
 			child.SetSize(targetW, targetH)
 		} else { // "col"
-			// В режиме col ширина всех детей растягивается под полную ширину контента контейнера
 			targetW := contentW
 			targetH := ch
 
-			if childStyle.FlexGrow > 0 {
+			if isFlex1 {
 				targetH = growSize
 				if remainder > 0 {
 					targetH++
