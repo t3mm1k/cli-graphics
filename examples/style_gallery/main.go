@@ -65,19 +65,26 @@ func main() {
 	counterLabel := widgets.NewLabel(4, 15, false, "Click count: 0", "fg:white")
 	root.AddChild(counterLabel)
 
-	btnClick := widgets.NewButton(4, 17, "Click Me (+1)", func() {
+	// Создаем горизонтальный Flex-контейнер для автоматического выравнивания кнопок в ряд
+	// Координаты задаются только для коробки
+	buttonFlexGroup := widgets.NewBox(4, 17, 34, 7, "flex flex-row p-1 border-single border:gray")
+	root.AddChild(buttonFlexGroup)
+
+	// Кнопки с счетчиком
+	btnClick := widgets.NewButton(0, 0, "Click Me (+1)", func() {
 		counter++
 		counterLabel.SetText(fmt.Sprintf("Click count: %d", counter))
-	}, "border-rounded border:dim-gray fg:white focus:border:yellow active:reverse")
+	}, "flex-1 border-rounded border:dim-gray fg:white focus:border:yellow active:reverse")
 
-	btnReset := widgets.NewButton(22, 17, "Reset", func() {
+	btnReset := widgets.NewButton(0, 0, "Reset", func() {
 		counter = 0
 		counterLabel.SetText("Click count: 0")
-	}, "border-rounded border:dim-gray fg:coral focus:border:red active:reverse")
+	}, "flex-1 border-rounded border:dim-gray fg:coral focus:border:red active:reverse")
 
-	root.AddChild(btnClick)
-	root.AddChild(btnReset)
+	buttonFlexGroup.AddChild(btnClick)
+	buttonFlexGroup.AddChild(btnReset)
 
+	// Надпись для ввода
 	inputLabel := widgets.NewLabel(40, 15, false, "Type something below:", "fg:white")
 	root.AddChild(inputLabel)
 
@@ -87,7 +94,7 @@ func main() {
 	root.AddChild(input)
 
 	// Навигационная подсказка
-	help := widgets.NewLabel(2, 22, false, "[Tab / Shift+Tab] Navigate focus  •  [Enter / Space] Activate  •  [Ctrl+C] Exit", "fg:dim-gray")
+	help := widgets.NewLabel(2, 27, false, "[Tab / Shift+Tab] Navigate focus  •  [Enter / Space] Activate  •  [Ctrl+C] Exit", "fg:dim-gray")
 	root.AddChild(help)
 
 	app := engine.NewApp(root)
