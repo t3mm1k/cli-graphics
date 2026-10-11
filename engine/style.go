@@ -239,6 +239,10 @@ type Style struct {
 	Padding  Padding
 	Align    TextAlign
 	Overflow TextOverflow
+
+	IsFlex        bool
+	FlexDirection string
+	FlexGrow      int
 }
 
 func parseColorRule(s *Style, str string) bool {
