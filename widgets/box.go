@@ -34,21 +34,67 @@ func NewBox(x, y, w, h int, classes ...string) *Box {
 func (b *Box) Render(canvas *engine.Canvas) {
 	style := b.CurrentStyle()
 	w, h := b.GetSize()
+	
 	canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
 
+	if style.IsFlex {
+		b.computeFlexLayout(style)
+	}
+
+	offset := 1
+	if style.Border == engine.BorderNone {
+		offset = 0
+	}
+
+	currentX := offset + style.Padding.Left
+	currentY := offset + style.Padding.Top
+
 	for _, child := range b.children {
-		x, y := child.GetCoords()
-		w, h := child.GetSize()
-		childCanvas := canvas.SubCanvas(
-			x+style.Padding.Left, 
-			y+style.Padding.Top, 
-			w-style.Padding.Left-style.Padding.Right, 
-			h-style.Padding.Top-style.Padding.Bottom,
-		)
+		if child == nil {
+			continue
+		}
+
+		var x, y int
+		cw, ch := child.GetSize()
+
+		if style.IsFlex {
+			x = currentX
+			y = currentY
+
+			// Так как SetCoords принадлежит BaseComponent, проверяем, реализует ли его дочерний виджет
+			if setter, ok := child.(interface{ SetCoords(x, y int) }); ok {
+				setter.SetCoords(x, y)
+			}
+
+			if style.FlexDirection == "row" {
+				currentX += cw
+			} else { // "col"
+				currentY += ch
+			}
+		} else {
+			x, y = child.GetCoords()
+			x += style.Padding.Left
+			y += style.Padding.Top
+		}
+
+		// Создаем изолированный SubCanvas для дочернего элемента с учетом рамок родителя
+		// В режиме flex ширина/высота уже обрезаны под контентную зону методом computeFlexLayout
+		var childCanvas *engine.Canvas
+		if style.IsFlex {
+			childCanvas = canvas.SubCanvas(x, y, cw, ch)
+		} else {
+			childCanvas = canvas.SubCanvas(
+				x, 
+				y, 
+				w-style.Padding.Left-style.Padding.Right, 
+				h-style.Padding.Top-style.Padding.Bottom,
+			)
+		}
 		
 		child.Render(childCanvas)
 	}
 }
+
 
 func (b *Box) OnTick() {
 	for _, child := range b.children {
