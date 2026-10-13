@@ -1,16 +1,72 @@
 package main
 
 import (
-	"cli-graphics/ui"
-	"cli-graphics/ui/listView"
-	"cli-graphics/ui/window"
+	"cli-graphics/engine"
+	"cli-graphics/widgets"
+	"fmt"
+	"image"
+	"net/http"
+
+	_ "image/jpeg"
+	_ "image/png"
 )
 
 func main() {
-	win := window.New(17, 61)
-	list := listView.New(12, 30, ui.Point{X: 29, Y: 2}, []string{"тп на аме — Серега Пират", "Почему ты еще не фанат? — Серега Пират", "Я поднимаю свою голову вверх — Серега Пират", "ЧСВ — Lida & Серега Пират", "Зомби апокалипсис — Серега Пират", "Вайбмен — Серега Пират", "как же он силён — Серега Пират", "Ну и что, что я вор? — Серега Пират", "прости я не знаю — Серега Пират", "ну где моя нога — Серега Пират"})
-	win.AddObject((*listView.ListView)(list))
-	win.Render()
+	rootScreen := widgets.NewBox(0, 0, 80, 24)
+	btnImage := widgets.NewButton(10, 20, "Image", nil)
+	picture := widgets.NewImage(40, 10, 40, 20, nil)
+	rootScreen.AddChild(btnImage)
+	rootScreen.AddChild(picture)
+	rootScreen.SetFocus(true)
 
-	win.Print()
+	app := engine.NewApp(rootScreen)
+	app.SetLogging(true)
+
+	app.AddShortcut("Ctrl+L", func() {
+		go func() {
+			imgURL := "https://avatars.yandex.net/get-music-content/16334817/73d15c0c.a.16218390-2/400x400"
+			resp, err := http.Get(imgURL)
+			if err != nil {
+				return
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				return
+			}
+			img, _, err := image.Decode(resp.Body)
+			if err != nil {
+				return
+			}
+
+			app.Post(func() {
+				picture.SetImage(img)
+			})
+		}()
+	})
+
+	btnImage.OnClick = func() {
+		go func() {
+			imgURL := "https://avatars.yandex.net/get-music-content/16334817/73d15c0c.a.16218390-2/400x400"
+			resp, err := http.Get(imgURL)
+			if err != nil {
+				return
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				return
+			}
+			img, _, err := image.Decode(resp.Body)
+			if err != nil {
+				return
+			}
+
+			app.Post(func() {
+				picture.SetImage(img)
+			})
+		}()
+	}
+
+	if err := app.Run(); err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
 }

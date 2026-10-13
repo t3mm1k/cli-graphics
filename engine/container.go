@@ -1,0 +1,8 @@
+package engine
+
+type Container interface {
+	Component
+
+	AddChild(child Component)
+	Children() []Component
+}
