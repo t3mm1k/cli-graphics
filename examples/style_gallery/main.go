@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"cli-graphics/engine"
 	"cli-graphics/widgets"
@@ -9,7 +10,7 @@ import (
 
 func main() {
 	// Главное окно
-	root := widgets.NewBox(0, 0, 80, 24, "border-double border:neon-cyan bg:default")
+	root := widgets.NewBox(0, 0, 80, 44, "border-double border:neon-cyan bg:default")
 
 	// Заголовок
 	title := widgets.NewLabel(2, 1, false, "🎨  CLI Graphics — Style & Component Gallery", "fg:yellow bold")
@@ -61,30 +62,40 @@ func main() {
 	interactiveTitle := widgets.NewLabel(4, 13, false, "4. INTERACTIVE WIDGETS & FOCUS STATES (Press Tab):", "fg:neon-cyan bold")
 	root.AddChild(interactiveTitle)
 
+	var pb1 *widgets.ProgressBar
+
 	counter := 0
 	counterLabel := widgets.NewLabel(4, 15, false, "Click count: 0", "fg:white")
 	root.AddChild(counterLabel)
 
-	btnClick := widgets.NewButton(4, 17, "Click Me (+1)", func() {
+	// Создаем горизонтальный Flex-контейнер для автоматического выравнивания кнопок в ряд
+	// Координаты задаются только для коробки
+	buttonFlexGroup := widgets.NewBox(4, 17, 34, 7, "flex flex-row p-1 border-single border:gray")
+	root.AddChild(buttonFlexGroup)
+
+	// Кнопки с счетчиком
+	btnClick := widgets.NewButton(0, 0, "Click Me (+1)", func() {
 		counter++
 		counterLabel.SetText(fmt.Sprintf("Click count: %d", counter))
-	}, "border-rounded border:dim-gray fg:white focus:border:yellow active:reverse px-2")
+		if pb1 != nil {
+			pb1.SetProgress(float64(counter%11) / 10.0)
+		}
+	}, "flex-1 border-rounded border:dim-gray fg:white focus:border:yellow active:reverse px-2")
 
-	btnReset := widgets.NewButton(22, 17, "  Reset  ", func() {
+	btnReset := widgets.NewButton(0, 0, "Reset", func() {
 		counter = 0
 		counterLabel.SetText("Click count: 0")
-	}, "border-rounded border:dim-gray fg:coral focus:border:red active:reverse px-2")
+		if pb1 != nil {
+			pb1.SetProgress(0.0)
+		}
+	}, "flex-1 border-rounded border:dim-gray fg:coral focus:border:red active:reverse px-2")
 
-	root.AddChild(btnClick)
-	root.AddChild(btnReset)
+	buttonFlexGroup.AddChild(btnClick)
+	buttonFlexGroup.AddChild(btnReset)
 
-	inputLabel := widgets.NewLabel(40, 15, false, "Type something below:", "fg:white")
+	// Надпись для ввода
+	inputLabel := widgets.NewLabel(40, 15, false, "Select language:", "fg:white")
 	root.AddChild(inputLabel)
-
-	input := widgets.NewInput(40, 17, 34, func(key string) {
-		// Реакция на ввод
-	}, "border-single border:dim-gray fg:white focus:border:neon-cyan")
-	root.AddChild(input)
 
 	
 	galleryList.OnSelect = func(index int, text string) {
@@ -92,10 +103,10 @@ func main() {
 	}
 
 	// Секция многострочного текста (TextArea и InputArea)
-	divider2 := widgets.NewLabel(2, 20, false, "────────────────────────────────────────────────────────────────────────────", "fg:dark-gray")
+	divider2 := widgets.NewLabel(2, 24, false, "────────────────────────────────────────────────────────────────────────────", "fg:dark-gray")
 	root.AddChild(divider2)
 
-	multiLineTitle := widgets.NewLabel(4, 21, false, "5. MULTI-LINE TEXT COMPONENTS (TextArea & InputArea):", "fg:neon-cyan bold")
+	multiLineTitle := widgets.NewLabel(4, 25, false, "5. MULTI-LINE TEXT COMPONENTS (TextArea & InputArea):", "fg:neon-cyan bold")
 	root.AddChild(multiLineTitle)
 
 	// Текст с Markdown для TextArea
@@ -106,22 +117,44 @@ func main() {
 		"# Another Header\n" +
 		"End of document text line."
 
-	taLabel := widgets.NewLabel(4, 23, false, "TextArea (Read-only + MD + Scroll):", "fg:dim-gray")
+	taLabel := widgets.NewLabel(4, 27, false, "TextArea (Read-only + MD + Scroll):", "fg:dim-gray")
 	root.AddChild(taLabel)
 
 	// TextArea шириной 34 и высотой 6
-	galleryTextArea := widgets.NewTextArea(34, 6, 4, 25, mdText)
+	galleryTextArea := widgets.NewTextArea(34, 6, 4, 28, mdText)
 	root.AddChild(galleryTextArea)
 
-	iaLabel := widgets.NewLabel(42, 23, false, "InputArea (Multi-line editor + Scroll):", "fg:dim-gray")
+	iaLabel := widgets.NewLabel(42, 27, false, "InputArea (Multi-line editor + Scroll):", "fg:dim-gray")
 	root.AddChild(iaLabel)
 
 	// InputArea шириной 34 и высотой 6
-	galleryInputArea := widgets.NewInputArea(34, 6, 42, 25, "Type text here...\nPress Enter for new line.")
+	galleryInputArea := widgets.NewInputArea(34, 6, 42, 28, "Type text here...\nPress Enter for new line.")
 	root.AddChild(galleryInputArea)
 
+	// Секция индикаторов прогресса (ProgressBar)
+	divider3 := widgets.NewLabel(2, 34, false, "────────────────────────────────────────────────────────────────────────────", "fg:dark-gray")
+	root.AddChild(divider3)
+
+	pbTitle := widgets.NewLabel(4, 35, false, "6. PROGRESS BARS (Percentages & Time Formats):", "fg:neon-cyan bold")
+	root.AddChild(pbTitle)
+
+	pb1Label := widgets.NewLabel(4, 37, false, "Interactive Percentage (connected to Click Me button):", "fg:dim-gray")
+	root.AddChild(pb1Label)
+
+	pb1 = widgets.NewProgressBar(4, 39, 34, 3, "border-rounded border:neon-cyan fg:neon-cyan")
+	pb1.SetProgress(0.40)
+	root.AddChild(pb1)
+
+	pb2Label := widgets.NewLabel(42, 38, false, "Media Track Progress (Time mm:ss format):", "fg:dim-gray")
+	root.AddChild(pb2Label)
+
+	pb2 := widgets.NewProgressBar(42, 39, 34, 3, "border-single border:pastel-green fg:pastel-green")
+	pb2.SetTime(85*time.Second, 180*time.Second)
+	pb2.SetFormat(widgets.FormatTime)
+	root.AddChild(pb2)
+
 	// Навигационная подсказка снизу
-	help := widgets.NewLabel(2, 34, false, "[Tab / Shift+Tab] Navigate focus  •  [Arrows] Scroll & Move Cursor  •  [Ctrl+C] Exit", "fg:dim-gray")
+	help := widgets.NewLabel(2, 43, false, "[Tab / Shift+Tab] Navigate focus  •  [Arrows] Scroll & Move Cursor  •  [Ctrl+C] Exit", "fg:dim-gray")
 	root.AddChild(help)
 
 	app := engine.NewApp(root)
