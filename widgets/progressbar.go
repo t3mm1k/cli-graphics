@@ -143,4 +143,87 @@ func (p *ProgressBar) FormatText() string {
 
 func (p *ProgressBar) OnTick() {}
 
-func (p *ProgressBar) Render(canvas *engine.Canvas) {}
+func (p *ProgressBar) Render(canvas *engine.Canvas) {
+	style := p.CurrentStyle()
+	w, h := p.GetSize()
+	if w <= 0 || h <= 0 {
+		return
+	}
+
+	offset := 0
+	if style.Border != engine.BorderNone {
+		canvas.DrawRect(0, 0, w, h, style.Border, style.BorderFg, style.Bg)
+		offset = 1
+	} else if !style.Bg.IsDefault {
+		canvas.Fill(0, 0, w, h, engine.NewCellColored(' ', engine.ColorDefault(), style.Bg))
+	}
+
+	innerW := w - 2*offset
+	innerH := h - 2*offset
+	if innerW <= 0 || innerH <= 0 {
+		return
+	}
+
+	filledCols := int(float64(innerW) * p.progress)
+	if filledCols < 0 {
+		filledCols = 0
+	} else if filledCols > innerW {
+		filledCols = innerW
+	}
+
+	emptyColor := style.BorderFg
+	if emptyColor.IsDefault {
+		if c, ok := engine.BaseColors.Get("dim-gray"); ok {
+			emptyColor = c
+		} else {
+			emptyColor = engine.ColorDefault()
+		}
+	}
+
+	// Отрисовка полосы прогресса (заполненная и незаполненная части)
+	for row := 0; row < innerH; row++ {
+		y := offset + row
+		for col := 0; col < innerW; col++ {
+			x := offset + col
+			if col < filledCols {
+				cell := engine.NewCellColored(p.fillRune, style.Fg, style.Bg)
+				canvas.SetCell(x, y, cell)
+			} else {
+				cell := engine.NewCellColored(p.emptyRune, emptyColor, style.Bg)
+				canvas.SetCell(x, y, cell)
+			}
+		}
+	}
+
+	// Наложение текста поверх полосы (если включено)
+	if p.showText {
+		text := p.FormatText()
+		if text != "" {
+			textY := offset + innerH/2
+			textX := offset + innerW/2
+			switch style.Align {
+			case engine.TextAlignLeft:
+				textX = offset + 1
+			case engine.TextAlignRight:
+				textX = offset + innerW - 1
+			case engine.TextAlignCenter:
+				textX = offset + innerW/2
+			}
+
+			textColor := style.Fg
+			if textColor.IsDefault {
+				if c, ok := engine.BaseColors.Get("white"); ok {
+					textColor = c
+				} else {
+					textColor = engine.ColorDefault()
+				}
+			}
+			textStyle := style.TextStyle
+			if textStyle == engine.TextStyleDefault {
+				textStyle = engine.TextStyleBold
+			}
+
+			canvas.DrawStringAligned(textX, textY, text, textColor, textStyle, style.Align)
+		}
+	}
+}
