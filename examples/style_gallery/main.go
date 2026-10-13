@@ -65,26 +65,28 @@ func main() {
 	counterLabel := widgets.NewLabel(4, 15, false, "Click count: 0", "fg:white")
 	root.AddChild(counterLabel)
 
-	btnClick := widgets.NewButton(4, 17, "Click Me (+1)", func() {
+	// Создаем горизонтальный Flex-контейнер для автоматического выравнивания кнопок в ряд
+	// Координаты задаются только для коробки
+	buttonFlexGroup := widgets.NewBox(4, 17, 34, 7, "flex flex-row p-1 border-single border:gray")
+	root.AddChild(buttonFlexGroup)
+
+	// Кнопки с счетчиком
+	btnClick := widgets.NewButton(0, 0, "Click Me (+1)", func() {
 		counter++
 		counterLabel.SetText(fmt.Sprintf("Click count: %d", counter))
-	}, "border-rounded border:dim-gray fg:white focus:border:yellow active:reverse px-2")
+	}, "flex-1 border-rounded border:dim-gray fg:white focus:border:yellow active:reverse")
 
-	btnReset := widgets.NewButton(22, 17, "  Reset  ", func() {
+	btnReset := widgets.NewButton(0, 0, "Reset", func() {
 		counter = 0
 		counterLabel.SetText("Click count: 0")
-	}, "border-rounded border:dim-gray fg:coral focus:border:red active:reverse px-2")
+	}, "flex-1 border-rounded border:dim-gray fg:coral focus:border:red active:reverse")
 
-	root.AddChild(btnClick)
-	root.AddChild(btnReset)
+	buttonFlexGroup.AddChild(btnClick)
+	buttonFlexGroup.AddChild(btnReset)
 
-	inputLabel := widgets.NewLabel(40, 15, false, "Type something below:", "fg:white")
+	// Надпись для ввода
+	inputLabel := widgets.NewLabel(40, 15, false, "Select language:", "fg:white")
 	root.AddChild(inputLabel)
-
-	input := widgets.NewInput(40, 17, 34, func(key string) {
-		// Реакция на ввод
-	}, "border-single border:dim-gray fg:white focus:border:neon-cyan")
-	root.AddChild(input)
 
 	
 	galleryList.OnSelect = func(index int, text string) {
@@ -92,10 +94,10 @@ func main() {
 	}
 
 	// Секция многострочного текста (TextArea и InputArea)
-	divider2 := widgets.NewLabel(2, 20, false, "────────────────────────────────────────────────────────────────────────────", "fg:dark-gray")
+	divider2 := widgets.NewLabel(2, 24, false, "────────────────────────────────────────────────────────────────────────────", "fg:dark-gray")
 	root.AddChild(divider2)
 
-	multiLineTitle := widgets.NewLabel(4, 21, false, "5. MULTI-LINE TEXT COMPONENTS (TextArea & InputArea):", "fg:neon-cyan bold")
+	multiLineTitle := widgets.NewLabel(4, 25, false, "5. MULTI-LINE TEXT COMPONENTS (TextArea & InputArea):", "fg:neon-cyan bold")
 	root.AddChild(multiLineTitle)
 
 	// Текст с Markdown для TextArea
@@ -106,22 +108,22 @@ func main() {
 		"# Another Header\n" +
 		"End of document text line."
 
-	taLabel := widgets.NewLabel(4, 23, false, "TextArea (Read-only + MD + Scroll):", "fg:dim-gray")
+	taLabel := widgets.NewLabel(4, 27, false, "TextArea (Read-only + MD + Scroll):", "fg:dim-gray")
 	root.AddChild(taLabel)
 
 	// TextArea шириной 34 и высотой 6
-	galleryTextArea := widgets.NewTextArea(34, 6, 4, 25, mdText)
+	galleryTextArea := widgets.NewTextArea(34, 6, 4, 28, mdText)
 	root.AddChild(galleryTextArea)
 
-	iaLabel := widgets.NewLabel(42, 23, false, "InputArea (Multi-line editor + Scroll):", "fg:dim-gray")
+	iaLabel := widgets.NewLabel(42, 27, false, "InputArea (Multi-line editor + Scroll):", "fg:dim-gray")
 	root.AddChild(iaLabel)
 
 	// InputArea шириной 34 и высотой 6
-	galleryInputArea := widgets.NewInputArea(34, 6, 42, 25, "Type text here...\nPress Enter for new line.")
+	galleryInputArea := widgets.NewInputArea(34, 6, 42, 28, "Type text here...\nPress Enter for new line.")
 	root.AddChild(galleryInputArea)
 
 	// Навигационная подсказка снизу
-	help := widgets.NewLabel(2, 34, false, "[Tab / Shift+Tab] Navigate focus  •  [Arrows] Scroll & Move Cursor  •  [Ctrl+C] Exit", "fg:dim-gray")
+	help := widgets.NewLabel(2, 35, false, "[Tab / Shift+Tab] Navigate focus  •  [Arrows] Scroll & Move Cursor  •  [Ctrl+C] Exit", "fg:dim-gray")
 	root.AddChild(help)
 
 	app := engine.NewApp(root)
