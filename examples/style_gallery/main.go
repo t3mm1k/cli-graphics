@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"cli-graphics/engine"
 	"cli-graphics/widgets"
@@ -9,7 +10,7 @@ import (
 
 func main() {
 	// Главное окно
-	root := widgets.NewBox(0, 0, 80, 24, "border-double border:neon-cyan bg:default")
+	root := widgets.NewBox(0, 0, 80, 44, "border-double border:neon-cyan bg:default")
 
 	// Заголовок
 	title := widgets.NewLabel(2, 1, false, "🎨  CLI Graphics — Style & Component Gallery", "fg:yellow bold")
@@ -61,6 +62,8 @@ func main() {
 	interactiveTitle := widgets.NewLabel(4, 13, false, "4. INTERACTIVE WIDGETS & FOCUS STATES (Press Tab):", "fg:neon-cyan bold")
 	root.AddChild(interactiveTitle)
 
+	var pb1 *widgets.ProgressBar
+
 	counter := 0
 	counterLabel := widgets.NewLabel(4, 15, false, "Click count: 0", "fg:white")
 	root.AddChild(counterLabel)
@@ -74,12 +77,18 @@ func main() {
 	btnClick := widgets.NewButton(0, 0, "Click Me (+1)", func() {
 		counter++
 		counterLabel.SetText(fmt.Sprintf("Click count: %d", counter))
-	}, "flex-1 border-rounded border:dim-gray fg:white focus:border:yellow active:reverse")
+		if pb1 != nil {
+			pb1.SetProgress(float64(counter%11) / 10.0)
+		}
+	}, "flex-1 border-rounded border:dim-gray fg:white focus:border:yellow active:reverse px-2")
 
 	btnReset := widgets.NewButton(0, 0, "Reset", func() {
 		counter = 0
 		counterLabel.SetText("Click count: 0")
-	}, "flex-1 border-rounded border:dim-gray fg:coral focus:border:red active:reverse")
+		if pb1 != nil {
+			pb1.SetProgress(0.0)
+		}
+	}, "flex-1 border-rounded border:dim-gray fg:coral focus:border:red active:reverse px-2")
 
 	buttonFlexGroup.AddChild(btnClick)
 	buttonFlexGroup.AddChild(btnReset)
@@ -122,8 +131,30 @@ func main() {
 	galleryInputArea := widgets.NewInputArea(34, 6, 42, 28, "Type text here...\nPress Enter for new line.")
 	root.AddChild(galleryInputArea)
 
+	// Секция индикаторов прогресса (ProgressBar)
+	divider3 := widgets.NewLabel(2, 34, false, "────────────────────────────────────────────────────────────────────────────", "fg:dark-gray")
+	root.AddChild(divider3)
+
+	pbTitle := widgets.NewLabel(4, 35, false, "6. PROGRESS BARS (Percentages & Time Formats):", "fg:neon-cyan bold")
+	root.AddChild(pbTitle)
+
+	pb1Label := widgets.NewLabel(4, 37, false, "Interactive Percentage (connected to Click Me button):", "fg:dim-gray")
+	root.AddChild(pb1Label)
+
+	pb1 = widgets.NewProgressBar(4, 39, 34, 3, "border-rounded border:neon-cyan fg:neon-cyan")
+	pb1.SetProgress(0.40)
+	root.AddChild(pb1)
+
+	pb2Label := widgets.NewLabel(42, 38, false, "Media Track Progress (Time mm:ss format):", "fg:dim-gray")
+	root.AddChild(pb2Label)
+
+	pb2 := widgets.NewProgressBar(42, 39, 34, 3, "border-single border:pastel-green fg:pastel-green")
+	pb2.SetTime(85*time.Second, 180*time.Second)
+	pb2.SetFormat(widgets.FormatTime)
+	root.AddChild(pb2)
+
 	// Навигационная подсказка снизу
-	help := widgets.NewLabel(2, 35, false, "[Tab / Shift+Tab] Navigate focus  •  [Arrows] Scroll & Move Cursor  •  [Ctrl+C] Exit", "fg:dim-gray")
+	help := widgets.NewLabel(2, 43, false, "[Tab / Shift+Tab] Navigate focus  •  [Arrows] Scroll & Move Cursor  •  [Ctrl+C] Exit", "fg:dim-gray")
 	root.AddChild(help)
 
 	app := engine.NewApp(root)
