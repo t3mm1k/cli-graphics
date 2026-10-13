@@ -1,4 +1,4 @@
-module cli-graphics
+module github.com/t3mm1k/cli-graphics
 
 go 1.27.1
 

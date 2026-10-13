@@ -2,7 +2,7 @@ package engine
 
 import (
 	"bytes"
-	"cli-graphics/utils"
+	"github.com/t3mm1k/cli-graphics/utils"
 	"fmt"
 	"os"
 	"runtime/debug"

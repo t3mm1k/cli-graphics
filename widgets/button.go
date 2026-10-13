@@ -1,8 +1,8 @@
 package widgets
 
 import (
-	"cli-graphics/engine"
-	"cli-graphics/utils"
+	"github.com/t3mm1k/cli-graphics/engine"
+	"github.com/t3mm1k/cli-graphics/utils"
 	"unicode/utf8"
 
 	"github.com/google/uuid"
