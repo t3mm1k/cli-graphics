@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"cli-graphics/engine"
+	"github.com/t3mm1k/cli-graphics/engine"
 
 	"github.com/google/uuid"
 )

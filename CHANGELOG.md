@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1] - 2026-10-13
+
+### Changed
+- Переименован модуль в `go.mod` на `github.com/t3mm1k/cli-graphics` для поддержки установки пакета через `go get`.
+- Обновлены пути импорта во всех внутренних пакетах, примерах и виджетах на `github.com/t3mm1k/cli-graphics/...`.
+- В `README.md` добавлена инструкция по установке через `go get github.com/t3mm1k/cli-graphics`.
+
 ## [1.0.0] - 2026-10-13
 
 ### Added

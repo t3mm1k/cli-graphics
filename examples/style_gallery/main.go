@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"cli-graphics/engine"
-	"cli-graphics/widgets"
+	"github.com/t3mm1k/cli-graphics/engine"
+	"github.com/t3mm1k/cli-graphics/widgets"
 )
 
 func main() {

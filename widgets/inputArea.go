@@ -1,7 +1,7 @@
 package widgets
 
 import (
-	"cli-graphics/engine"
+	"github.com/t3mm1k/cli-graphics/engine"
 
 	"unicode/utf8"
 )
