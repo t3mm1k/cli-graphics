@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"cli-graphics/engine"
+	"github.com/t3mm1k/cli-graphics/engine"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

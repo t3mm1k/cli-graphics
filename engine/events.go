@@ -1,6 +1,6 @@
 package engine
 
-import "cli-graphics/utils"
+import "github.com/t3mm1k/cli-graphics/utils"
 
 type Event interface{}
 

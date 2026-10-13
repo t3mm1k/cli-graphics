@@ -14,14 +14,22 @@
 
 ---
 
+## Установка
+
+```bash
+go get github.com/t3mm1k/cli-graphics
+```
+
+---
+
 ## Быстрый старт
 
 ```go
 package main
 
 import (
-	"cli-graphics/engine"
-	"cli-graphics/widgets"
+	"github.com/t3mm1k/cli-graphics/engine"
+	"github.com/t3mm1k/cli-graphics/widgets"
 	"fmt"
 	"image"
 	"net/http"
