@@ -20,6 +20,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: 'stable'
+          
+      - name: Linter
+        run: go vet ./...
 
       - name: Build
         run: go build -v ./...
